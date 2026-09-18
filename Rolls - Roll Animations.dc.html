@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#E8E1D3; }
+a { color:#26241F; } a:hover { color:#8A6134; }
+@keyframes outA { 0% { width:14px; } 65% { width:196px; } 82% { width:186px; } 100% { width:190px; } }
+@keyframes tautA { 0% { width:190px; } 22% { width:201px; } 40% { width:201px; } 80% { width:10px; } 90% { width:17px; } 100% { width:14px; } }
+@keyframes recoilA { 0% { transform:translateX(0); } 35% { transform:translateX(-3px); } 100% { transform:translateX(0); } }
+@keyframes shakeA { 0%,100% { transform:translateX(0); } 30% { transform:translateX(2.5px); } 60% { transform:translateX(-2px); } }
+@keyframes outB { 0% { width:12px; } 55% { width:202px; } 70% { width:172px; } 85% { width:196px; } 100% { width:188px; } }
+@keyframes tautB { 0% { width:188px; } 12% { width:199px; } 18% { width:196px; } 24% { width:199px; } 30% { width:196px; } 38% { width:199px; } 82% { width:8px; } 92% { width:15px; } 100% { width:12px; } }
+@keyframes squashB { 0% { transform:scaleY(1); } 55% { transform:scaleY(0.84); } 75% { transform:scaleY(1.08); } 100% { transform:scaleY(1); } }
+@keyframes spinB { from { transform:rotate(0deg); } to { transform:rotate(-300deg); } }
+@keyframes spinBrev { from { transform:rotate(0deg); } to { transform:rotate(720deg); } }
+@keyframes outC { 0% { width:0px; opacity:0.3; } 100% { width:172px; opacity:1; } }
+@keyframes tautC { 0% { width:172px; } 24% { width:180px; filter:brightness(1.2); } 46% { width:180px; filter:brightness(1.2); } 100% { width:0px; } }
+@keyframes popC { 0% { transform:translateY(-50%) scale(0.5); opacity:0; } 100% { transform:translateY(-50%) scale(1); opacity:1; } }
+@keyframes stampC { 0% { transform:scale(1.8); opacity:0; } 55% { transform:scale(0.94); opacity:1; } 100% { transform:scale(1); opacity:1; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; box-sizing:border-box; background:#E8E1D3; padding:36px 40px 60px; font-family:'Hanken Grotesk',sans-serif; color:#2A2823; -webkit-font-smoothing:antialiased;">
+  <section style="display:flex; flex-direction:column; gap:20px;">
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <span style="font-size:24px; font-weight:800;">Roll start &amp; finish animations</span>
+      <span style="font-size:14px; color:#7A7264;">Three directions — each has both moments. Hit the buttons to replay. All under 0.75s.</span>
+    </div>
+    <div style="display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start;">
+
+      <div id="1a" style="position:relative; width:346px; background:#F1ECE0; border-radius:18px; padding:18px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;">
+        <span style="position:absolute; top:12px; right:14px; font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">1a</span>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-size:15px; font-weight:800;">Leader pull</span>
+          <span style="font-size:12.5px; color:#7A7264; line-height:1.45;">Literal &amp; mechanical. The leader tongue shoots out with a tiny settle; on finish it pulls taut, holds a beat, then whips back in — the canister rocks as it lands.</span>
+        </div>
+        <div style="height:140px; background:#E5DECF; border-radius:13px; display:flex; align-items:center; padding:0 16px; overflow:hidden;">
+          <div style="{{ aCanStyle }}">
+            <div style="position:absolute; left:14px; top:0; width:24px; height:6px; border-radius:3px 3px 0 0; background:#8B8270;"></div>
+            <div style="position:absolute; left:3px; top:6px; right:3px; bottom:0; border:2px solid #2A2823; border-radius:7px; background:#F1ECE0;"></div>
+            <div style="position:absolute; left:5px; top:32px; right:5px; height:11px; background:#C79A55;"></div>
+            <div style="position:absolute; right:0px; top:24px; bottom:14px; width:3px; background:#2A2823; border-radius:2px;"></div>
+          </div>
+          <div style="{{ aWrapStyle }}">
+            <div style="position:absolute; right:0; top:0; height:100%; width:212px; background:#33302A; clip-path:polygon(0 0, calc(100% - 30px) 0, calc(100% - 30px) 46%, 100% 46%, 100% 100%, 0 100%);">
+              <div style="position:absolute; left:0; right:0; top:3px; height:5px; background:repeating-linear-gradient(90deg,#E5DECF 0 5px,transparent 5px 13px);"></div>
+              <div style="position:absolute; left:0; right:0; bottom:3px; height:5px; background:repeating-linear-gradient(90deg,#E5DECF 0 5px,transparent 5px 13px);"></div>
+              <div style="position:absolute; left:0; right:0; top:10px; bottom:10px; background:repeating-linear-gradient(90deg,transparent 0 34px,rgba(255,255,255,0.10) 34px 36px);"></div>
+              <span style="{{ aChipStyle }}">{{ aChipText }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button onClick="{{ aStart }}" style="appearance:none; cursor:pointer; border:none; background:#26241F; color:#EFE9DB; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">▶ Start roll</button>
+          <button onClick="{{ aFinish }}" style="appearance:none; cursor:pointer; border:1px solid rgba(42,40,35,0.22); background:transparent; color:#2A2823; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">◼ Finish roll</button>
+        </div>
+      </div>
+
+      <div id="1b" style="position:relative; width:346px; background:#F1ECE0; border-radius:18px; padding:18px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;">
+        <span style="position:absolute; top:12px; right:14px; font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">1b</span>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-size:15px; font-weight:800;">Spool whip</span>
+          <span style="font-size:12.5px; color:#7A7264; line-height:1.45;">Playful, top-down spool. Film bounces out with squash-and-stretch while the spool spins; on finish it vibrates taut, then the spool whips it back with a fast rewind spin.</span>
+        </div>
+        <div style="height:140px; background:#E5DECF; border-radius:13px; display:flex; align-items:center; padding:0 16px; overflow:hidden;">
+          <div style="flex:none; position:relative; width:56px; height:56px; z-index:2;">
+            <div style="position:absolute; inset:0; border-radius:50%; background:#1E1C19; box-shadow:inset 0 0 0 3px #141311;"></div>
+            <div style="{{ bMarkStyle }}">
+              <div style="position:absolute; inset:16px; border-radius:50%; background:#4A5B60;"></div>
+              <div style="position:absolute; left:50%; top:5px; width:2px; height:12px; background:#8FA6AC; border-radius:1px;"></div>
+            </div>
+          </div>
+          <div style="{{ bWrapStyle }}">
+            <div style="{{ bStripStyle }}">
+              <div style="position:absolute; left:0; right:0; top:3px; height:4px; background:repeating-linear-gradient(90deg,#E5DECF 0 4px,transparent 4px 11px);"></div>
+              <div style="position:absolute; left:0; right:0; bottom:3px; height:4px; background:repeating-linear-gradient(90deg,#E5DECF 0 4px,transparent 4px 11px);"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button onClick="{{ bStart }}" style="appearance:none; cursor:pointer; border:none; background:#26241F; color:#EFE9DB; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">▶ Start roll</button>
+          <button onClick="{{ bFinish }}" style="appearance:none; cursor:pointer; border:1px solid rgba(42,40,35,0.22); background:transparent; color:#2A2823; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">◼ Finish roll</button>
+        </div>
+      </div>
+
+      <div id="1c" style="position:relative; width:346px; background:#F1ECE0; border-radius:18px; padding:18px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;">
+        <span style="position:absolute; top:12px; right:14px; font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">1c</span>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-size:15px; font-weight:800;">Quick tab</span>
+          <span style="font-size:12.5px; color:#7A7264; line-height:1.45;">Minimal &amp; utilitarian. A thin strip snaps out and the frame counter pops at the tip; on finish it brightens taut, retracts, and a DEVELOP stamp lands. Fastest of the three.</span>
+        </div>
+        <div style="height:140px; background:#E5DECF; border-radius:13px; display:flex; align-items:center; padding:0 16px; position:relative; overflow:hidden;">
+          <div style="flex:none; position:relative; width:40px; height:56px; background:#23211D; border-radius:6px; z-index:2;">
+            <div style="position:absolute; left:0; right:0; top:12px; height:22px; background:#8A6134;"></div>
+            <div style="position:absolute; right:-3px; top:18px; bottom:18px; width:4px; background:#141311; border-radius:2px;"></div>
+          </div>
+          <div style="{{ cWrapStyle }}">
+            <div style="position:absolute; right:0; top:0; height:100%; width:190px; background:#3A322A; clip-path:polygon(0 0, calc(100% - 20px) 0, calc(100% - 20px) 44%, 100% 44%, 100% 100%, 0 100%);">
+              <span style="{{ cChipStyle }}">01</span>
+            </div>
+          </div>
+          <span style="{{ cStampStyle }}">DEVELOP</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button onClick="{{ cStart }}" style="appearance:none; cursor:pointer; border:none; background:#26241F; color:#EFE9DB; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">▶ Start roll</button>
+          <button onClick="{{ cFinish }}" style="appearance:none; cursor:pointer; border:1px solid rgba(42,40,35,0.22); background:transparent; color:#2A2823; border-radius:10px; padding:8px 14px; font-family:'Hanken Grotesk'; font-size:12.5px; font-weight:700;">◼ Finish roll</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:420}}">
+class Component extends DCLogic {
+  state = { play: { a: null, b: null, c: null } };
+  go = (k, ph) => {
+    const p = Object.assign({}, this.state.play); p[k] = null;
+    this.setState({ play: p });
+    setTimeout(() => {
+      const q = Object.assign({}, this.state.play); q[k] = ph;
+      this.setState({ play: q });
+    }, 30);
+  };
+  renderVals() {
+    const p = this.state.play;
+    const wrapBase = (h) => 'position:relative; z-index:1; overflow:hidden; height:' + h + 'px; width:14px; margin-left:-2px; border-radius:0 2px 2px 0;';
+    const anim = (v, out, taut) => v === 'start' ? out : (v === 'finish' ? taut : '');
+    return {
+      aStart: () => this.go('a', 'start'), aFinish: () => this.go('a', 'finish'),
+      bStart: () => this.go('b', 'start'), bFinish: () => this.go('b', 'finish'),
+      cStart: () => this.go('c', 'start'), cFinish: () => this.go('c', 'finish'),
+      aWrapStyle: wrapBase(44) + 'margin-left:-9px;' + anim(p.a,
+        'animation:outA 0.55s cubic-bezier(0.22,0.9,0.32,1.2) forwards;',
+        'animation:tautA 0.72s cubic-bezier(0.6,0,0.4,1) forwards;'),
+      aCanStyle: 'flex:none; position:relative; width:52px; height:66px; z-index:2; overflow:visible;' + anim(p.a,
+        'animation:recoilA 0.55s ease;',
+        'animation:shakeA 0.32s ease 0.52s;'),
+      aChipStyle: "position:absolute; right:38px; top:50%; transform:translateY(-50%); font-family:'DM Mono',monospace; font-size:10px; font-weight:500; color:#E8C583; opacity:0;" + (p.a === 'start' ? 'animation:popC 0.24s ease 0.42s forwards;' : (p.a === 'finish' ? 'opacity:1;' : '')),
+      aChipText: p.a === 'finish' ? '36' : '01',
+      bWrapStyle: wrapBase(38) + 'width:12px;' + anim(p.b,
+        'animation:outB 0.68s cubic-bezier(0.3,0.9,0.35,1.15) forwards;',
+        'animation:tautB 0.75s cubic-bezier(0.55,0,0.45,1) forwards;'),
+      bStripStyle: 'position:absolute; right:0; top:0; height:100%; width:212px; background:#2E4045; transform-origin:left center;' + (p.b === 'start' ? 'animation:squashB 0.68s ease;' : ''),
+      bMarkStyle: 'position:absolute; inset:5px; border-radius:50%; background:#2B2825;' + anim(p.b,
+        'animation:spinB 0.68s cubic-bezier(0.3,0.7,0.3,1);',
+        'animation:spinBrev 0.5s cubic-bezier(0.5,0,0.75,1) 0.26s;'),
+      cWrapStyle: 'position:relative; z-index:1; overflow:hidden; height:26px; width:0px; margin-left:-2px;' + anim(p.c,
+        'animation:outC 0.3s cubic-bezier(0.2,0.8,0.3,1) forwards;',
+        'animation:tautC 0.55s cubic-bezier(0.6,0,0.35,1) forwards;'),
+      cChipStyle: "position:absolute; right:26px; top:50%; transform:translateY(-50%); background:#8A6134; color:#F7EFDC; border-radius:4px; padding:1px 5px; font-family:'DM Mono',monospace; font-size:9px; opacity:0;" + (p.c === 'start' ? 'animation:popC 0.2s ease 0.24s forwards;' : ''),
+      cStampStyle: "position:absolute; right:22px; top:50%; margin-top:-11px; border:2px solid #A5301F; color:#A5301F; border-radius:5px; padding:2px 8px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.12em; transform:rotate(-7deg); opacity:0;" + (p.c === 'finish' ? 'animation:stampC 0.3s cubic-bezier(0.2,1.3,0.4,1) 0.5s both;' : ''),
+    };
+  }
+}
+</script>
+</body>
+</html>

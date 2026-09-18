@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</helmet>
+
+<div style="width:max-content; min-width:100%; min-height:100vh; box-sizing:border-box; padding:48px; background:#D9D3C7; font-family:'Hanken Grotesk', system-ui, sans-serif; display:flex; flex-direction:column; gap:54px;">
+
+  <!-- header -->
+  <div style="display:flex; flex-direction:column; gap:9px; max-width:760px;">
+    <div style="display:flex; align-items:center; gap:13px;">
+      <!-- minimal canister placeholder mark -->
+      <div style="flex:none; width:30px; height:38px; position:relative;">
+        <div style="position:absolute; left:8px; top:0; width:14px; height:4px; border-radius:2px 2px 0 0; background:#8B8270;"></div>
+        <div style="position:absolute; left:2px; top:4px; right:2px; bottom:0; border:1.5px solid #2A2823; border-radius:5px; background:#EDE7D9;"></div>
+        <div style="position:absolute; left:2px; top:20px; right:2px; height:7px; background:#C79A55;"></div>
+      </div>
+      <span style="font-family:'Hanken Grotesk',sans-serif; font-size:34px; font-weight:700; color:#2A2823; letter-spacing:-0.01em;">Rolls</span>
+      <span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:#8B8270; border:1px solid rgba(42,40,35,0.18); border-radius:6px; padding:4px 8px; align-self:center;">MATTE GRAPHITE</span>
+    </div>
+    <p style="margin:0; font-family:'Hanken Grotesk'; font-size:15px; line-height:1.55; color:#5C564B; max-width:640px;">Frame logging — the core screen. Speed-first frame capture: tap any value to spin a wheel, tap a light chip to set it, wind the dial to advance. The roll's colour scheme adapts to the film stock; both image slots take a photo, and the stamp auto-fills but stays editable. Mobile and desktop, live.</p>
+  </div>
+
+  <!-- mobile -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8B8270;">Mobile — primary use</span>
+    <div style="display:flex; align-items:flex-start; gap:48px;">
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Film frame</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">The negative is the hero. Perforated film header, 2×2 exposure cards, side wind dial.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Frame Logging Screen" demo="true" mode="mobile" variant="A" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- desktop -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8B8270;">Desktop</span>
+    <div style="display:flex; align-items:flex-start; gap:48px;">
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:1180px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Desktop · Three-pane</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Roll &amp; logged frames at left, the negative centred with its wind dial, editors at right. Pickers slide in as a drawer.</span>
+        </div>
+        <x-import component="ChromeWindow" from="./browser-window.jsx" url="rolls.app/roll/014" hint-size="1180px,740px">
+          <dc-import name="Frame Logging Screen" demo="true" mode="desktop" variant="A" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

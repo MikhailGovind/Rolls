@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</helmet>
+
+<div style="width:max-content; min-width:100%; min-height:100vh; box-sizing:border-box; padding:48px; background:#D9D3C7; font-family:'Hanken Grotesk', system-ui, sans-serif; display:flex; flex-direction:column; gap:54px;">
+
+  <!-- header -->
+  <div style="display:flex; flex-direction:column; gap:9px; max-width:820px;">
+    <div style="display:flex; align-items:center; gap:13px;">
+      <div style="flex:none; width:30px; height:38px; position:relative;">
+        <div style="position:absolute; left:8px; top:0; width:14px; height:4px; border-radius:2px 2px 0 0; background:#8B8270;"></div>
+        <div style="position:absolute; left:2px; top:4px; right:2px; bottom:0; border:1.5px solid #2A2823; border-radius:5px; background:#EDE7D9;"></div>
+        <div style="position:absolute; left:2px; top:20px; right:2px; height:7px; background:#C79A55;"></div>
+      </div>
+      <span style="font-family:'Hanken Grotesk',sans-serif; font-size:34px; font-weight:700; color:#2A2823; letter-spacing:-0.01em;">Rolls</span>
+      <span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:#8B8270; border:1px solid rgba(42,40,35,0.18); border-radius:6px; padding:4px 8px; align-self:center;">OPENING SCREEN</span>
+    </div>
+    <p style="margin:0; font-family:'Hanken Grotesk'; font-size:15px; line-height:1.55; color:#5C564B; max-width:680px;">The front door — <strong>your Shelf</strong>: a logbook of every roll, each with its own film-cartridge icon, and “load a new roll” as the primary action. Swipe left into the <strong>Cosmos</strong>: a single continuous zoom from your frames on a <strong>timeline</strong>, out to a <strong>map</strong> of where you shot, all the way to the <strong>globe</strong> adrift among the stars. Mobile and desktop, both on the chosen ledger direction. All live — drag the swipe track, pinch to travel days → map → globe.</p>
+  </div>
+
+  <!-- mobile home : chosen direction -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8B8270;">Mobile — Your Shelf</span>
+    <div style="display:flex; align-items:flex-start; gap:48px;">
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">The Shelf · logbook index</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Dense darkroom ledger — each roll carries its own film-cartridge icon. “Load a new roll” pinned to the bottom.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="home" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Frame logging</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Live in-app: tap a roll on the Shelf to open it; “‹ Your Shelf” goes back. Theme changes apply here too.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="home" roll0="1" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- mobile cosmos continuum --><!-- cosmos unchanged -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8B8270;">Mobile — Cosmos · Days → Places → Earth</span>
+    <div style="display:flex; align-items:flex-start; gap:48px;">
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Days · calendar</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Photo-tile months floating in space. Scroll through months; pinch out to fly to the map.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="10" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Places · real map</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">A real, draggable map (live tiles) with photo stacks where frames were shot. Tap a stack to expand → jump to that frame; zoom out far enough and it becomes the Earth.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="52" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:402px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Earth · 3D globe</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">A real 3D Earth — drag to spin it; tap a photo stack (or pinch in) to fly back into the map.</span>
+        </div>
+        <x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+          <dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="90" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- desktop -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#8B8270;">Desktop</span>
+    <div style="display:flex; align-items:flex-start; gap:48px;">
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:1400px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Shelf → frame logging</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Left rail is Your Shelf — every roll listed. Pick one and it opens that roll’s frame-logging page in place; the empty state prompts you to choose.</span>
+        </div>
+        <x-import component="ChromeWindow" from="./browser-window.jsx" url="rolls.app" hint-size="1400px,860px">
+          <dc-import name="Opening Screen" demo="true" mode="desktop" variant="A" view="home" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+      <div style="flex:none; display:flex; flex-direction:column; gap:16px; width:1400px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.06em; color:#2A2823;">Cosmos · globe</span>
+          <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264; line-height:1.4;">Real 3D Earth on the star field; pinch-zoom travels calendar → map → globe.</span>
+        </div>
+        <x-import component="ChromeWindow" from="./browser-window.jsx" url="rolls.app/cosmos" hint-size="1400px,860px">
+          <dc-import name="Opening Screen" demo="true" mode="desktop" variant="A" view="cosmos" zoom0="88" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+        </x-import>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

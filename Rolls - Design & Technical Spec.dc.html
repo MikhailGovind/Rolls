@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  doc-page { font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #2A2823; }
+  h1 { font-family: 'Hanken Grotesk', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  h2 { font-family: 'Hanken Grotesk', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.01em; margin: 34px 0 10px; padding-bottom: 6px; border-bottom: 1.5px solid #E2DACB; break-after: avoid; }
+  h3 { font-family: 'Hanken Grotesk', sans-serif; font-weight: 700; font-size: 15px; margin: 20px 0 6px; break-after: avoid; }
+  p, li { font-size: 13px; line-height: 1.6; color: #46423A; }
+  strong { color: #2A2823; font-weight: 700; }
+  ul, ol { margin: 6px 0 6px; padding-left: 20px; }
+  li { margin-bottom: 3px; }
+  code, .mono { font-family: 'DM Mono', monospace; font-size: 12px; background: #F1ECE0; padding: 1px 5px; border-radius: 4px; color: #5C4420; }
+  .kicker { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9A9280; margin: 0 0 20px; }
+  .lede { font-size: 15px; line-height: 1.65; color: #2A2823; }
+  .callout { break-inside: avoid; background: #F4EFE3; border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .callout .h { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A6134; margin: 0 0 5px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .card { break-inside: avoid; border: 1.5px solid #E2DACB; border-radius: 12px; padding: 13px 15px; }
+  .card .t { font-weight: 700; font-size: 14px; margin: 0 0 3px; }
+  .card .d { font-size: 12px; line-height: 1.5; color: #6E675B; }
+  .swrow { display: flex; gap: 6px; margin: 8px 0 2px; }
+  .sw { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); }
+  table.spec { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  table.spec th { text-align: left; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #8B8270; border-bottom: 1.5px solid #2A2823; padding: 5px 8px; }
+  table.spec td { border-bottom: 1px solid #E2DACB; padding: 6px 8px; vertical-align: top; line-height: 1.45; color: #46423A; }
+  table.spec td:first-child { font-family: 'DM Mono', monospace; color: #5C4420; white-space: nowrap; }
+  .toc { break-inside: avoid; background: #F4EFE3; border-radius: 12px; padding: 16px 20px; margin: 18px 0 8px; }
+  .toc ol { columns: 2; column-gap: 28px; margin: 0; padding-left: 18px; }
+  .toc li { font-size: 12.5px; margin-bottom: 4px; }
+  .meta { display: flex; gap: 26px; flex-wrap: wrap; margin: 14px 0 4px; font-size: 12px; }
+  .meta b { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #9A9280; font-weight: 500; margin-bottom: 2px; }
+  a { color: #8A6134; }
+  a:hover { color: #5C4420; }
+</style>
+</helmet>
+
+<doc-page margin="0.85in">
+  <div slot="header" style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:#B7AE9B; padding-bottom:8px;">Rolls · Design &amp; Technical Specification</div>
+  <div slot="footer" style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; color:#B7AE9B; padding-top:8px; text-align:right;">Living document · maintained alongside the designs</div>
+
+  <h1 style="margin-top:34px;">Rolls</h1>
+  <p class="lede">A film-photography logbook. Photographers load a roll into the app the way they load one into a camera, record the settings for every frame as they shoot, and later watch their shots surface across time and place in a living star-field called the Cosmos.</p>
+
+  <div class="meta">
+    <div><b>Status</b>Design prototype</div>
+    <div><b>Platforms</b>iOS · Android · Web (Windows later)</div>
+    <div><b>Last updated</b>21 Jul 2026</div>
+    <div><b>Owner</b>Product / Design</div>
+  </div>
+
+  <div class="toc">
+    <ol>
+      <li>Product overview</li>
+      <li>Core concepts &amp; vocabulary</li>
+      <li>Design system</li>
+      <li>Themes &amp; appearance</li>
+      <li>Screen-by-screen spec</li>
+      <li>Interaction &amp; animation</li>
+      <li>Data model</li>
+      <li>Accounts &amp; sync (Supabase)</li>
+      <li>Platform &amp; build plan</li>
+      <li>Open questions &amp; backlog</li>
+    </ol>
+  </div>
+
+  <h2>1 · Product overview</h2>
+  <p><strong>The problem.</strong> Film photographers shoot blind — there's no metadata baked into a negative, so the aperture, shutter, light, and location of each frame live only in memory or a paper notebook until the scans come back weeks later. Details get lost, and the connection between a decision made in the field and the final image is broken.</p>
+  <p><strong>Rolls</strong> is the notebook, rebuilt as a calm, tactile app. You log each frame as you shoot it; when the roll is finished you rewind it, send it to develop, and match your scans back to the frames you recorded. Over time the app becomes a personal archive you can travel through by <em>time</em> (a calendar) and by <em>place</em> (a map that pulls back into a globe).</p>
+  <div class="callout">
+    <p class="h">Design north star</p>
+    <p style="margin:0;">Calm, analog, unhurried. The app should feel like a well-made darkroom tool — paper textures, ledger typography, film-stock color — not a busy digital dashboard. Every element earns its place; when in doubt, remove it.</p>
+  </div>
+
+  <h2>2 · Core concepts &amp; vocabulary</h2>
+  <p>These are the app's proper nouns. Use them consistently in UI copy and code.</p>
+  <table class="spec">
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Roll</td><td>One roll of film — a named container with a film stock, camera body, frame capacity (e.g. 24/36), format, and a status. Carries its own cartridge icon and film-stock color.</td></tr>
+      <tr><td>Frame</td><td>One exposure on a roll. Holds aperture, shutter, ISO, light condition(s), a reference photo and/or a scan, location, date, and a note.</td></tr>
+      <tr><td>Shelf</td><td>The home screen — the ledger of all your rolls, grouped Active / Developing / Done, sortable and filterable.</td></tr>
+      <tr><td>Cosmos</td><td>The time-and-place view. One continuous pinch-zoom: Calendar (days) → Map (places) → Globe (Earth in the stars).</td></tr>
+      <tr><td>The dial</td><td>The frame selector on the logging screen — a wind-on control that moves between frames, styled after a film-advance dial.</td></tr>
+      <tr><td>Leader / canister</td><td>The film-cartridge iconography used throughout — the roll icon, the start/finish animations.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3 · Design system</h2>
+  <h3>Typography</h3>
+  <ul>
+    <li><strong>Hanken Grotesk</strong> — the primary typeface. Used for the <span class="mono">Rolls</span> wordmark, all headings, roll titles, and body/UI text. Weights 400–800.</li>
+    <li><strong>DM Mono</strong> — the ledger/label voice. Used for kickers, small-caps labels, frame numbers, aperture/shutter/ISO values, timestamps, and metadata.</li>
+  </ul>
+  <h3>Color — base (Portra, default theme)</h3>
+  <div class="swrow">
+    <div class="sw" style="background:#E8E1D3;" title="Paper"></div>
+    <div class="sw" style="background:#F4EFE3;" title="Card"></div>
+    <div class="sw" style="background:#2A2823;" title="Ink"></div>
+    <div class="sw" style="background:#26241F;" title="Button"></div>
+    <div class="sw" style="background:#9A9280;" title="Muted"></div>
+    <div class="sw" style="background:#8A6134;" title="Accent"></div>
+  </div>
+  <p style="font-size:11px; color:#8B8270; margin-top:2px;">Paper · Card · Ink · Button · Muted · Accent. Warm paper ground, ledger-brown ink, film-stock accent.</p>
+  <h3>Surfaces &amp; components</h3>
+  <ul>
+    <li><strong>Ledger rows</strong> — the Shelf lists rolls as ruled rows with columns (Roll · Loaded · Frames · State), not cards. Density over decoration.</li>
+    <li><strong>Roll icon</strong> — an ink-outlined film cartridge with a cap nub and a film band tinted to the roll's stock color. This is the app's signature mark and appears at every scale.</li>
+    <li><strong>Film strip</strong> — the frame-logging surface. Translucent, glossy, holographic sheen on hover/tilt; evenly spaced perforations edge to edge; band color pulled from the film stock.</li>
+    <li><strong>Sheets</strong> — modal editors slide in from the bottom (mobile) or the right (desktop, 400px).</li>
+    <li><strong>Buttons</strong> — dark, solid <span class="mono">--t-btn</span> for primary actions; ghost/transparent for navigation.</li>
+  </ul>
+  <div class="callout">
+    <p class="h">Anti-patterns to avoid</p>
+    <p style="margin:0;">No aggressive gradients, no emoji, no rounded-box-with-left-accent-border cards, no Inter/Roboto. Keep to 1–2 background tones per surface. Layout with flex/grid + gap, never inline spacing.</p>
+  </div>
+
+  <h2>4 · Themes &amp; appearance</h2>
+  <p>Themes are inspired by film stocks. Each ships a <strong>light</strong> and a <strong>dark</strong> variant. Appearance is chosen independently: <strong>System</strong> (default — follows the device), <strong>Light</strong>, or <strong>Dark</strong>. All colors resolve through CSS custom properties (<span class="mono">--t-paper</span>, <span class="mono">--t-ink</span>, <span class="mono">--t-btn</span>, …) so every screen re-inks live when the theme changes.</p>
+  <table class="spec">
+    <thead><tr><th>Theme</th><th>Character</th></tr></thead>
+    <tbody>
+      <tr><td>Portra 400</td><td>Default. Warm paper, ledger brown.</td></tr>
+      <tr><td>Silver Gelatin</td><td>Pure grayscale, high contrast.</td></tr>
+      <tr><td>Tungsten</td><td>Cool night blue, halation red (CineStill).</td></tr>
+      <tr><td>Slide Film</td><td>Saturated greens, vivid.</td></tr>
+      <tr><td>Gold 200</td><td>Sun-faded amber warmth.</td></tr>
+      <tr><td>Darkroom</td><td>Red safelight glow.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px; color:#8B8270;">Palettes live in <span class="mono">themes.js</span> (<span class="mono">THEMES</span> + <span class="mono">resolveTheme()</span>). Selection persists to <span class="mono">localStorage</span> today; it moves to the user's account record once sync is live.</p>
+
+  <h2>5 · Screen-by-screen spec</h2>
+
+  <h3>5.1 Shelf (home)</h3>
+  <ul>
+    <li>Ledger of all rolls in three groups: <strong>Active</strong>, <strong>Developing</strong>, <strong>Done</strong>.</li>
+    <li>Columns: Roll (icon + name) · Loaded (start date) · Frames (shot/capacity) · State.</li>
+    <li><strong>Sort/filter bar</strong>: tap <em>Roll</em> → A–Z then Z–A; tap <em>Loaded</em> → oldest→newest then reverse. Default sort is newest first.</li>
+    <li><strong>Swipe-right to delete</strong> a roll (reveals a red Delete; confirm dialog before removal). Same on desktop for consistency.</li>
+    <li><strong>Load a new roll</strong> is the primary action, pinned bottom (mobile) / in the pick-a-roll space (desktop).</li>
+    <li><strong>Desktop</strong>: a left rail lists rolls; selecting one expands its frame-logging view in place. The rail slides fully off-screen when a roll is open. Before any selection, the space reads "Pick a roll to start logging."</li>
+  </ul>
+
+  <h3>5.2 Frame logging</h3>
+  <ul>
+    <li>The film strip shows the current frame; the <strong>dial</strong> winds between frames (drag or ‹ › — ticks sit inside the ends so first/last frames stay visible).</li>
+    <li>Per frame: <strong>Aperture, Shutter, ISO</strong> (wheel pickers), <strong>Light</strong> (multi-select chips + a ＋ to add/edit/delete custom conditions; defaults are locked), <strong>reference photo</strong> and <strong>scan</strong> slots, location, and a note.</li>
+    <li>Winding past the last frame opens the <strong>Roll Summary</strong> → Mark as Done / Send to Developing.</li>
+    <li>A way back to the opening screen is always present.</li>
+  </ul>
+
+  <h3>5.3 Load a new roll</h3>
+  <ul>
+    <li>Choose film stock, camera body, frame count (or custom), format.</li>
+    <li>Start mode: <strong>Fresh roll (frame 1)</strong> or <strong>Start from a frame</strong> of the user's choice.</li>
+  </ul>
+
+  <h3>5.4 End of roll → Developing → Scans</h3>
+  <ul>
+    <li><strong>Roll Summary</strong>: roll name, frames · date span · locations · film, and a thumbnail grid.</li>
+    <li><strong>Done</strong> → returns to the Shelf marked Done.</li>
+    <li><strong>Developing</strong> → a rewound canister in a Developing section ("Rewound {date} · at the lab").</li>
+    <li><strong>Scan matching</strong>: add multiple scans; they fill frame slots in shooting order. Blocks can be <strong>drag-reordered</strong>, and dragged down onto a <strong>trash</strong> target to clear a wrong image. On confirm, the roll is marked Done.</li>
+  </ul>
+
+  <h3>5.5 Cosmos (Calendar → Map → Globe)</h3>
+  <ul>
+    <li>One continuous <strong>pinch-zoom</strong> journey; no slider. Scroll months in the Calendar, zoom out into the Map, keep zooming out into the Globe.</li>
+    <li><strong>Calendar</strong>: month cards on a star field (paper-translucent, no borders). A day with a frame shows its image; a small glowing dot marks days a roll was started (color pulled from that roll; cycles if several). First tap selects/shows the day; second tap opens that frame.</li>
+    <li><strong>Map</strong>: photos appear where they were taken (auto GPS + manual override). Tap a stack → expand a photo → "Go to this frame."</li>
+    <li><strong>Globe</strong>: real 3D Earth (blue-marble texture) adrift in the stars; drag to spin; tapping a photo card flies into the Map at that location.</li>
+    <li>Star field: dense sharp stars, with rare random comets / meteors / phenomena. Aesthetic = paper-meets-space, dark blue/black (never brown), calm.</li>
+    <li>Navigation icons follow the destination's look: an animated mini-globe to enter the Map, an animated mini-calendar to return to today. Chrome (‹ Shelf, title) aligns to the top on desktop, clears the status bar on mobile.</li>
+  </ul>
+
+  <h3>5.6 Auth</h3>
+  <ul>
+    <li>Sign in, Create account, Reset password. Email + password, with Google / Apple providers to follow.</li>
+    <li>Split layout on desktop (brand panel + form card, centered); single column on mobile.</li>
+  </ul>
+
+  <h3>5.7 Settings / Account</h3>
+  <ul>
+    <li>Edit profile (name in Rolls, account name, profile image) · Default film · Units · <strong>Choose theme</strong> (+ appearance) · Export library · Sign out.</li>
+  </ul>
+
+  <h2>6 · Interaction &amp; animation</h2>
+  <ul>
+    <li><strong>Start a roll</strong>: the leader tongue pulls out of the cartridge (the app's roll icon), frame <span class="mono">01</span> popping onto the strip. Quick and snappy. Background desaturates while it plays; no modal card.</li>
+    <li><strong>Finish a roll</strong>: the leader pulls taut, then winds rapidly back into the cartridge, carrying the roll's <em>final</em> frame number (adapts to that roll's capacity).</li>
+    <li><strong>Dial feedback</strong> on wind, on both mobile and desktop.</li>
+    <li><strong>Cosmos transitions</strong> are zoom-driven and continuous, not fades.</li>
+    <li>Chip rows and wheel pickers: <strong>drag to scroll, tap to select</strong> — a drag never mis-fires a selection.</li>
+  </ul>
+
+  <h2>7 · Data model</h2>
+  <p>Three core entities. A user owns many rolls; a roll owns many frames.</p>
+  <table class="spec">
+    <thead><tr><th>Entity</th><th>Key fields</th></tr></thead>
+    <tbody>
+      <tr><td>profile</td><td>id (→ auth user), display_name, account_name, avatar_path, default_film, units, theme, appearance</td></tr>
+      <tr><td>roll</td><td>id, owner, name, film_stock, camera_body, format, capacity, shot_count, status (active / developing / done), started_at, rewound_at</td></tr>
+      <tr><td>frame</td><td>id, roll_id, index, aperture, shutter, iso, light[] , note, lat, lng, taken_at, reference_path, scan_path</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px; color:#8B8270;">Light conditions: default set is fixed; user-created conditions are stored per profile so they persist and can be edited/deleted.</p>
+
+  <h2>8 · Accounts &amp; sync (Supabase)</h2>
+  <p>Supabase (hosted Postgres + Auth + Storage) is the recommended backend. A signed-in user's rolls and frames — including reference and scan images — load on any device.</p>
+  <ol>
+    <li><strong>Auth</strong>: email/password to start (maps to the three Auth screens); add Google &amp; Apple providers later.</li>
+    <li><strong>Tables</strong>: <span class="mono">profiles</span>, <span class="mono">rolls</span>, <span class="mono">frames</span> (keys as in §7).</li>
+    <li><strong>Storage</strong>: a private <span class="mono">frame-images</span> bucket; rows store the path, the app requests signed URLs.</li>
+    <li><strong>Row-Level Security</strong> (required): every table restricted to <span class="mono">owner = auth.uid()</span>.</li>
+    <li><strong>Client</strong>: Supabase JS client with the project URL + anon key.</li>
+  </ol>
+  <div class="callout">
+    <p class="h">Next deliverable</p>
+    <p style="margin:0;">A hand-off doc with paste-ready SQL (CREATE TABLE + RLS policies), bucket setup, and auth wiring. To be produced when we enter the build phase.</p>
+  </div>
+
+  <h2>9 · Platform &amp; build plan</h2>
+  <p>Goal: ship to the <strong>Apple App Store</strong>, <strong>Google Play</strong>, and the web, with Windows (Microsoft Store) as a later target. One codebase serves all of them.</p>
+  <h3>Recommended path</h3>
+  <ol>
+    <li><strong>Lock the design here</strong> (this project) — it is the source of truth for look, copy, and behavior.</li>
+    <li><strong>Build the functional app</strong> in a real code project: <strong>React (web) + React Native / Expo (iOS &amp; Android)</strong>, or a shared framework, wired to Supabase. Expo makes App Store + Play Store builds and over-the-air updates straightforward for a first-time shipper.</li>
+    <li><strong>Web</strong>: the same React UI deployed as <span class="mono">rolls.app</span>; can also be a PWA.</li>
+    <li><strong>Windows</strong>: reach it later via the web/PWA or a wrapper — don't let it gate the mobile launch.</li>
+  </ol>
+  <div class="grid2">
+    <div class="card"><p class="t">Why not design in v0 / a code tool now?</p><p class="d">They build code from prompts; they don't hold this darkroom-ledger design system. Move to code only for the functional build — after the design is locked here.</p></div>
+    <div class="card"><p class="t">Accounts needed</p><p class="d">Apple Developer Program ($99/yr), Google Play Console ($25 once), a Supabase project, and a domain for the web app.</p></div>
+  </div>
+
+  <h2>10 · Open questions &amp; backlog</h2>
+  <ul>
+    <li>Roll start/finish animation — wired; may refine timing/feel further.</li>
+    <li>Additional theme wiring polish across every dark variant (readability scrub done; revisit as themes are added).</li>
+    <li>Scan matching currently updates roll status but doesn't yet flow scans into each frame's slot — needs the real per-roll data store (Supabase).</li>
+    <li>Cosmos: revisit deeper interactions later (per earlier decision to move on for now).</li>
+    <li>Supabase hand-off doc (SQL + RLS + wiring) — to be written at build phase.</li>
+  </ul>
+
+  <h2>Revision history</h2>
+  <table class="spec">
+    <thead><tr><th>Date</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td>18 Sep 2026</td><td>Build phases 0–4 landed. <span class="mono">store.js</span> is the single source of truth (rolls, frames, light conditions, profile, settings) persisted to localStorage, with photos in IndexedDB and downscaled on import. <span class="mono">app.dc.html</span> is the installable entry (manifest, icons, service worker for offline). Export = full backup / data-only / CSV, plus restore. Design showcases pass <span class="mono">demo="true"</span> to keep sample data; the app starts empty.</td></tr>
+      <tr><td>21 Jul 2026</td><td>Initial specification — product overview, vocabulary, design system, themes, all screens, interactions/animations, data model, Supabase plan, platform/build plan.</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:26px; font-size:11px; color:#B7AE9B; font-family:'DM Mono',monospace;">— End of specification. This document is maintained in-project and updated as Rolls evolves.</p>
+</doc-page>
+</x-dc>
+</body>
+</html>

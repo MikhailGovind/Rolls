@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#CFC6B4; }
+a { color:#2A2823; } a:hover { color:#B03A2E; }
+</style>
+</helmet>
+<div style="min-height:100vh; box-sizing:border-box; padding:44px 40px 60px; font-family:'Hanken Grotesk',sans-serif;">
+  <div style="max-width:1240px; margin:0 auto;">
+    <span style="display:block; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:#6E675B; margin-bottom:4px;">ROLLS · THEME EXPLORATION V2</span>
+    <span style="display:block; font-family:'DM Mono',monospace; font-size:28px; color:#2A2823; margin-bottom:6px;">Film-stock themes · light &amp; dark</span>
+    <span style="display:block; font-size:14px; color:#5C564B; margin-bottom:22px; max-width:600px;">Every theme now has a light and a dark mode. In Settings the user picks a theme, then an appearance: <strong>System</strong> (default — follows the device), Light, or Dark.</span>
+
+    <!-- appearance picker mock -->
+    <div style="display:inline-flex; flex-direction:column; gap:8px; background:#E5DECF; border:1px solid rgba(42,40,35,0.14); border-radius:14px; padding:14px 16px; margin-bottom:30px;">
+      <span style="font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Settings · Appearance</span>
+      <div style="display:flex; gap:6px;">
+        <span style="border-radius:9px; padding:8px 16px; background:#26241F; color:#EFE9DB; font-size:12px; font-weight:700;">System</span>
+        <span style="border-radius:9px; padding:8px 16px; background:transparent; border:1px solid rgba(42,40,35,0.18); color:#46423a; font-size:12px; font-weight:600;">Light</span>
+        <span style="border-radius:9px; padding:8px 16px; background:transparent; border:1px solid rgba(42,40,35,0.18); color:#46423a; font-size:12px; font-weight:600;">Dark</span>
+      </div>
+      <span style="font-size:11px; color:#8B8270;">System is the default — it follows the device's light/dark setting.</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(520px, 1fr)); gap:22px;">
+      <sc-for list="{{ themes }}" as="t" hint-placeholder-count="6">
+      <div style="border-radius:18px; overflow:hidden; border:1px solid rgba(42,40,35,0.2); box-shadow:0 18px 44px rgba(0,0,0,0.2); background:#1F1B15;">
+        <div style="display:grid; grid-template-columns:1fr 1fr;">
+          <sc-for list="{{ t.modes }}" as="m" hint-placeholder-count="2">
+          <div style="background:{{ m.paper }}; padding:16px 18px 18px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2px;"><span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.16em; color:{{ m.muted }};">FILM LOG</span><span style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.08em; color:{{ m.muted }};">{{ m.label }}</span></div>
+            <span style="display:block; font-family:'DM Mono',monospace; font-size:18px; color:{{ m.ink }}; margin-bottom:12px;">{{ t.name }}</span>
+            <div style="border-radius:10px; background:linear-gradient(115deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 45%), {{ m.strip }}; border:1px solid {{ m.cardBorder }}; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; box-shadow:{{ m.stripGlow }};"><span style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.14em; color:{{ m.stripAccent }};">35MM</span><span style="font-size:13px; font-weight:700; color:{{ m.stripInk }};">Summer</span></span><span style="font-family:'DM Mono',monospace; font-size:16px; color:{{ m.stripInk }};">12<span style="font-size:10px; color:{{ m.stripSub }};">/36</span></span></div>
+            <div style="display:flex; gap:7px; margin-bottom:10px;"><span style="flex:1; border-radius:8px; background:{{ m.card }}; border:1px solid {{ m.cardBorder }}; padding:8px 10px; font-size:10.5px; color:{{ m.ink }};"><span style="display:block; font-size:8px; font-weight:700; letter-spacing:0.1em; color:{{ m.muted }}; margin-bottom:2px;">APERTURE</span>f/8</span><span style="flex:1; border-radius:8px; background:{{ m.card }}; border:1px solid {{ m.cardBorder }}; padding:8px 10px; font-size:10.5px; color:{{ m.ink }};"><span style="display:block; font-size:8px; font-weight:700; letter-spacing:0.1em; color:{{ m.muted }}; margin-bottom:2px;">SHUTTER</span>1/500</span></div>
+            <button style="width:100%; appearance:none; border:none; cursor:pointer; border-radius:9px; background:{{ m.btn }}; color:{{ m.btnText }}; padding:10px; font-family:'Hanken Grotesk'; font-size:11px; font-weight:800; box-shadow:{{ m.btnGlow }};">+ Load a new roll</button>
+          </div>
+          </sc-for>
+        </div>
+        <div style="background:#15120D; padding:13px 18px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; font-weight:700; color:#EFE9DB;">{{ t.desc }}</span>
+          <span style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; color:#8B8270;">{{ t.tag }}</span>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+
+    <span style="display:block; margin-top:26px; font-size:13px; color:#5C564B; max-width:660px;">Left half is light mode, right half is dark mode. Tell me which themes make the cut and I'll wire the picker (theme + System/Light/Dark) into Settings across every screen.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const none = 'none';
+    const mk = (o) => Object.assign({ stripGlow: none, btnGlow: none }, o);
+    const themes = [
+      { name:'Portra', tag:'DEFAULT', desc:'Portra 400 · warm paper, ledger brown ink', modes:[
+        mk({ label:'LIGHT', paper:'#E5DECF', muted:'#9A9280', ink:'#2A2823', strip:'#3a2f26', stripAccent:'#C79A55', stripInk:'#EFE9DB', stripSub:'#8C8576', card:'#F4EFE3', cardBorder:'rgba(42,40,35,0.12)', btn:'#26241F', btnText:'#EFE9DB' }),
+        mk({ label:'DARK', paper:'#17130E', muted:'#7A7264', ink:'#EFE9DB', strip:'#2A211A', stripAccent:'#C79A55', stripInk:'#EFE9DB', stripSub:'#8C8576', card:'#231D15', cardBorder:'rgba(239,233,219,0.10)', btn:'#C79A55', btnText:'#201709' }),
+      ]},
+      { name:'Silver Gelatin', tag:'B&W', desc:'HP5 / Tri-X · pure grayscale, high contrast', modes:[
+        mk({ label:'LIGHT', paper:'#E8E6E1', muted:'#8E8C87', ink:'#1C1B19', strip:'#262524', stripAccent:'#C9C7C2', stripInk:'#F2F1EE', stripSub:'#7E7C78', card:'#F4F3F0', cardBorder:'rgba(28,27,25,0.12)', btn:'#1C1B19', btnText:'#F2F1EE' }),
+        mk({ label:'DARK', paper:'#151413', muted:'#7E7C78', ink:'#F2F1EE', strip:'#2B2A28', stripAccent:'#C9C7C2', stripInk:'#F2F1EE', stripSub:'#7E7C78', card:'#201F1D', cardBorder:'rgba(242,241,238,0.10)', btn:'#E8E6E1', btnText:'#161514' }),
+      ]},
+      { name:'Tungsten', tag:'NIGHT', desc:'CineStill 800T · cool blue + halation red', modes:[
+        mk({ label:'LIGHT', paper:'#E7EBF5', muted:'#6E7E9E', ink:'#1B2236', strip:'#223050', stripAccent:'#E86A5A', stripInk:'#E8EDF8', stripSub:'#8C9BBB', card:'#F3F5FB', cardBorder:'rgba(27,34,54,0.12)', btn:'#2A3A63', btnText:'#E8EDF8' }),
+        mk({ label:'DARK', paper:'#141928', muted:'#6E7E9E', ink:'#E8EDF8', strip:'#0d1120', stripAccent:'#E86A5A', stripInk:'#E8EDF8', stripSub:'#5C6987', card:'#1B2236', cardBorder:'rgba(110,126,158,0.22)', btn:'#E86A5A', btnText:'#140E0D', stripGlow:'0 0 16px rgba(232,106,90,0.12)' }),
+      ]},
+      { name:'Slide Film', tag:'VIVID', desc:'Velvia 50 · saturated greens + magenta pop', modes:[
+        mk({ label:'LIGHT', paper:'#EAF0E4', muted:'#7C8B72', ink:'#1F2A1C', strip:'#16351F', stripAccent:'#D24A78', stripInk:'#F0F5EA', stripSub:'#6F8368', card:'#F6FAF2', cardBorder:'rgba(31,42,28,0.12)', btn:'#1F5A2E', btnText:'#F0F5EA' }),
+        mk({ label:'DARK', paper:'#101810', muted:'#7C8B72', ink:'#E8F2E2', strip:'#16351F', stripAccent:'#D24A78', stripInk:'#F0F5EA', stripSub:'#6F8368', card:'#182418', cardBorder:'rgba(232,242,226,0.10)', btn:'#3C9B55', btnText:'#0B150C' }),
+      ]},
+      { name:'Golden', tag:'SUNNY', desc:'Gold 200 · sun-faded amber warmth', modes:[
+        mk({ label:'LIGHT', paper:'#F2E3C4', muted:'#A9884E', ink:'#3A2C14', strip:'#4A3418', stripAccent:'#E3A63C', stripInk:'#F7EFDC', stripSub:'#9C8459', card:'#F9EED6', cardBorder:'rgba(58,44,20,0.14)', btn:'#8A5E1F', btnText:'#F9EED6' }),
+        mk({ label:'DARK', paper:'#1D1408', muted:'#A9884E', ink:'#F7EFDC', strip:'#33230E', stripAccent:'#E3A63C', stripInk:'#F7EFDC', stripSub:'#9C8459', card:'#291D0E', cardBorder:'rgba(247,239,220,0.10)', btn:'#E3A63C', btnText:'#241A0D' }),
+      ]},
+      { name:'Darkroom', tag:'SAFELIGHT', desc:'Darkroom · red safelight glow', modes:[
+        mk({ label:'LIGHT', paper:'#F6E7E0', muted:'#B06A5C', ink:'#3A1611', strip:'#57201A', stripAccent:'#F0A08E', stripInk:'#F8C9BD', stripSub:'#A5766B', card:'#FBF0EA', cardBorder:'rgba(58,22,17,0.12)', btn:'#C8402E', btnText:'#FBF0EA' }),
+        mk({ label:'DARK', paper:'#1A0908', muted:'#A03A30', ink:'#F8C9BD', strip:'#240C0A', stripAccent:'#E6553F', stripInk:'#F8C9BD', stripSub:'#8A4A40', card:'#2B100D', cardBorder:'rgba(200,70,55,0.26)', btn:'#E6553F', btnText:'#1A0908', stripGlow:'0 0 18px rgba(230,60,40,0.14)', btnGlow:'0 0 20px rgba(230,85,63,0.35)' }),
+      ]},
+    ];
+    return { themes };
+  }
+}
+</script>
+</body>
+</html>

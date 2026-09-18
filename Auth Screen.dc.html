@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@keyframes authIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes grainDrift { from { background-position: 0 0; } to { background-position: 340px 220px; } }
+.auth-in { animation: authIn 0.32s ease both; }
+</style>
+</helmet>
+
+<div style="position:relative; height:100%; width:100%; overflow:hidden; background:#E5DECF; font-family:'Hanken Grotesk', system-ui, sans-serif; color:#2A2823; -webkit-font-smoothing:antialiased; display:flex;">
+
+  <!-- ===== DESKTOP BRAND PANEL ===== -->
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:none; width:44%; height:100%; position:relative; background:#26241F; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:54px 48px;">
+    <div style="position:absolute; inset:0; opacity:0.07; background-image:radial-gradient(rgba(239,233,219,0.9) 1px, transparent 1px); background-size:5px 5px; animation:grainDrift 24s linear infinite;"></div>
+    <div style="position:relative; display:flex; align-items:center; gap:14px;">
+      <div style="flex:none; width:30px; height:38px; position:relative;">
+        <div style="position:absolute; left:8px; top:0; width:14px; height:4px; border-radius:2px 2px 0 0; background:#A79D8C;"></div>
+        <div style="position:absolute; left:2px; top:4px; right:2px; bottom:0; border:1.5px solid #EFE9DB; border-radius:5px; background:#34312A;"></div>
+        <div style="position:absolute; left:2px; top:20px; right:2px; height:7px; background:#C79A55;"></div>
+      </div>
+      <span style="font-family:'DM Mono',monospace; font-size:25px; font-weight:500; color:#EFE9DB; letter-spacing:-0.01em;">Rolls</span>
+    </div>
+    <div style="position:relative; display:flex; flex-direction:column; gap:18px; max-width:340px;">
+      <span style="font-family:'Hanken Grotesk',sans-serif; font-size:34px; font-weight:500; line-height:1.18; color:#F3EEE2;">Every frame you've ever shot, in one shelf.</span>
+      <span style="font-family:'Hanken Grotesk'; font-size:14px; line-height:1.6; color:#A9A08D;">Log exposures as you shoot, sync across every device, and watch your rolls drift through the Cosmos.</span>
+    </div>
+    <div style="position:relative; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.06em; color:#6E675B;">EST. 2026 · FILM LEDGER</div>
+  </div>
+  </sc-if>
+
+  <!-- ===== FORM AREA ===== -->
+  <div style="{{ formAreaStyle }}">
+    <div style="{{ formCardStyle }}">
+
+      <!-- mobile wordmark -->
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap:11px; margin-bottom:38px;">
+        <div style="flex:none; width:26px; height:33px; position:relative;">
+          <div style="position:absolute; left:7px; top:0; width:12px; height:3.5px; border-radius:2px 2px 0 0; background:#8B8270;"></div>
+          <div style="position:absolute; left:2px; top:3.5px; right:2px; bottom:0; border:1.5px solid #2A2823; border-radius:4px; background:#EDE7D9;"></div>
+          <div style="position:absolute; left:2px; top:17px; right:2px; height:6px; background:#C79A55;"></div>
+        </div>
+        <span style="font-family:'DM Mono',monospace; font-size:22px; font-weight:500; color:#2A2823; letter-spacing:-0.01em;">Rolls</span>
+      </div>
+      </sc-if>
+
+      <!-- heading -->
+      <div class="auth-in" key="{{ screen }}" style="display:flex; flex-direction:column; gap:6px; margin-bottom:26px;">
+        <span style="font-family:'DM Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:#A0967F;">{{ kicker }}</span>
+        <span style="font-family:'Hanken Grotesk',sans-serif; font-size:28px; font-weight:600; color:#2A2823; line-height:1.1;">{{ heading }}</span>
+        <span style="font-family:'Hanken Grotesk'; font-size:14px; line-height:1.5; color:#7A7264;">{{ subhead }}</span>
+      </div>
+
+      <!-- NAME (signup only) -->
+      <sc-if value="{{ showName }}" hint-placeholder-val="{{ false }}">
+      <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280; margin-bottom:7px;">Name in Rolls</label>
+      <input value="{{ f_name }}" onChange="{{ onName }}" placeholder="Your name" style="{{ inputStyle }}" />
+      </sc-if>
+
+      <!-- SENT confirmation -->
+      <sc-if value="{{ showSent }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; align-items:center; gap:13px; background:#FBF8F0; border:1px solid rgba(42,40,35,0.12); border-radius:13px; padding:15px 16px; margin-bottom:8px;">
+        <span style="flex:none; width:38px; height:38px; border-radius:50%; background:#E6EFE0; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:17px; color:#3E7A3E;">✓</span>
+        <span style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:#2A2823;">Reset link on its way</span><span style="font-family:'DM Mono',monospace; font-size:12px; color:#8B8270;">{{ sentEmail }}</span></span>
+      </div>
+      <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; line-height:1.5; color:#9A9280; margin-bottom:4px;">The link expires in 60 minutes. Check your spam folder if it doesn't arrive.</span>
+      </sc-if>
+
+      <!-- EMAIL -->
+      <sc-if value="{{ showEmailField }}" hint-placeholder-val="{{ true }}">
+      <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280; margin-bottom:7px;">Email</label>
+      <input value="{{ f_email }}" onChange="{{ onEmail }}" type="email" placeholder="you@example.com" style="{{ inputStyle }}" />
+      </sc-if>
+
+      <!-- PASSWORD -->
+      <sc-if value="{{ showPassword }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:7px;">
+        <label style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Password</label>
+        <sc-if value="{{ showForgotLink }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goForgot }}" style="appearance:none; cursor:pointer; background:none; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:12px; font-weight:600; color:#A8693A;">Forgot?</button></sc-if>
+      </div>
+      <div style="position:relative; margin-bottom:4px;">
+        <input value="{{ f_pass }}" onChange="{{ onPass }}" type="{{ passType }}" placeholder="{{ passPlaceholder }}" style="{{ inputStyleBare }}" />
+        <button onClick="{{ togglePass }}" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); appearance:none; cursor:pointer; background:none; border:none; padding:0; font-family:'DM Mono',monospace; font-size:11px; color:#9A9280;">{{ passToggleLabel }}</button>
+      </div>
+      <sc-if value="{{ showHint }}" hint-placeholder-val="{{ false }}"><span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; color:#9A9280; margin-top:5px;">At least 8 characters.</span></sc-if>
+      </sc-if>
+
+      <div style="height:24px;"></div>
+
+      <!-- PRIMARY -->
+      <button onClick="{{ submit }}" style="appearance:none; width:100%; cursor:pointer; background:#26241F; color:#EFE9DB; border:none; border-radius:13px; padding:15px; font-family:'Hanken Grotesk'; font-size:15px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.24);">{{ primaryLabel }}</button>
+
+      <!-- OAUTH (login/signup) -->
+      <sc-if value="{{ showOAuth }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap:12px; margin:20px 0;">
+        <span style="flex:1; height:1px; background:rgba(42,40,35,0.14);"></span>
+        <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; color:#A0967F;">OR</span>
+        <span style="flex:1; height:1px; background:rgba(42,40,35,0.14);"></span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button onClick="{{ oauth }}" style="appearance:none; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; background:#FBF8F0; color:#2A2823; border:1px solid rgba(42,40,35,0.14); border-radius:13px; padding:13px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:600;"><span style="font-family:'DM Mono',monospace; font-weight:500; color:#A8693A;">G</span> Continue with Google</button>
+        <button onClick="{{ oauth }}" style="appearance:none; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; background:#FBF8F0; color:#2A2823; border:1px solid rgba(42,40,35,0.14); border-radius:13px; padding:13px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:600;"><span style="font-family:'DM Mono',monospace; font-weight:500; color:#2A2823;"></span> Continue with Apple</button>
+      </div>
+      </sc-if>
+
+      <!-- FOOTER SWITCH -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:26px;">
+        <span style="font-family:'Hanken Grotesk'; font-size:13px; color:#7A7264;">{{ switchText }}</span>
+        <button onClick="{{ switchScreen }}" style="appearance:none; cursor:pointer; background:none; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:#A8693A;">{{ switchLabel }}</button>
+      </div>
+
+    </div>
+  </div>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="{{ toastStyle }}">{{ toast }}</div></sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1200&quot;,&quot;height&quot;:&quot;820&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mobile&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;'mobile'|'desktop'&quot;},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;signup&quot;,&quot;forgot&quot;,&quot;sent&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;'login'|'signup'|'forgot'|'sent'&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: this.props.screen || 'login',
+    name: '', email: '', pass: '',
+    showPass: false,
+    toast: null,
+  };
+
+  go = (screen) => this.setState({ screen, pass: '', showPass: false });
+  goForgot = () => this.go('forgot');
+  switchScreen = () => {
+    const sc = this.state.screen;
+    if (sc === 'sent') { this.toastMsg('Reset link sent again'); return; }
+    if (sc === 'forgot') { this.go('login'); return; }
+    this.go(sc === 'login' ? 'signup' : 'login');
+  };
+  togglePass = () => this.setState(s => ({ showPass: !s.showPass }));
+  onName = (e) => this.setState({ name: e.target.value });
+  onEmail = (e) => this.setState({ email: e.target.value });
+  onPass = (e) => this.setState({ pass: e.target.value });
+
+  toastMsg = (m) => { clearTimeout(this._t); this.setState({ toast: m }); this._t = setTimeout(() => this.setState({ toast: null }), 2200); };
+
+  submit = () => {
+    const sc = this.state.screen;
+    if (sc === 'login') this.toastMsg('Signing in…');
+    else if (sc === 'signup') this.toastMsg('Creating your account…');
+    else if (sc === 'forgot') { this.toastMsg('Reset link sent'); this.go('sent'); }
+    else this.go('login');
+  };
+  oauth = () => this.toastMsg('Connecting…');
+
+  renderVals() {
+    const s = this.state;
+    const isDesktop = this.props.mode === 'desktop';
+    const isMobile = !isDesktop;
+    const sc = s.screen;
+
+    const copy = {
+      login:  { kicker:'Welcome back', heading:'Sign in to your shelf', subhead:'Pick up right where you left off.', primary:'Log in', switchText:"New to Rolls?", switchLabel:'Create an account', passPh:'Your password' },
+      signup: { kicker:'Get started', heading:'Create your account', subhead:'Start logging frames in seconds.', primary:'Create account', switchText:'Already have an account?', switchLabel:'Log in', passPh:'Create a password' },
+      sent:   { kicker:'Password reset', heading:'Check your email', subhead:"We sent a reset link to your inbox. Follow it to choose a new password.", primary:'Back to log in', switchText:"Didn't get it?", switchLabel:'Resend link' },
+      forgot: { kicker:'Password reset', heading:'Reset your password', subhead:"Enter your email and we'll send a reset link.", primary:'Send reset link', switchText:'Remembered it?', switchLabel:'Back to log in', passPh:'' },
+    }[sc];
+
+    const inputBase = "width:100%; box-sizing:border-box; border:1px solid rgba(42,40,35,0.13); border-radius:11px; background:#FBF8F0; padding:13px 14px; font-family:'Hanken Grotesk'; font-size:15px; color:#2A2823; outline:none;";
+
+    const formAreaStyle = isDesktop
+      ? "flex:1; min-width:0; height:100%; display:flex; align-items:center; justify-content:center; padding:48px; background:#E5DECF;"
+      : "flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:center; padding:32px 26px;";
+    const formCardStyle = isDesktop
+      ? "width:100%; max-width:380px;"
+      : "width:100%;";
+
+    return {
+      isDesktop, isMobile, screen: sc,
+      formAreaStyle, formCardStyle,
+      kicker: copy.kicker, heading: copy.heading, subhead: copy.subhead,
+      primaryLabel: copy.primary, switchText: copy.switchText, switchLabel: copy.switchLabel,
+      passPlaceholder: copy.passPh,
+      showName: sc === 'signup',
+      showEmailField: sc !== 'sent',
+      showSent: sc === 'sent',
+      showPassword: sc === 'login' || sc === 'signup',
+      showForgotLink: sc === 'login',
+      showHint: sc === 'signup',
+      showOAuth: sc === 'login' || sc === 'signup',
+      f_name: s.name, f_email: s.email, f_pass: s.pass,
+      sentEmail: (s.email || '').trim() || 'your email address',
+      onName: this.onName, onEmail: this.onEmail, onPass: this.onPass,
+      passType: s.showPass ? 'text' : 'password',
+      passToggleLabel: s.showPass ? 'HIDE' : 'SHOW',
+      togglePass: this.togglePass,
+      inputStyle: inputBase + ' margin-bottom:16px;',
+      inputStyleBare: inputBase,
+      submit: this.submit, oauth: this.oauth,
+      goForgot: this.goForgot, switchScreen: this.switchScreen,
+      hasToast: !!s.toast, toast: s.toast,
+      toastStyle: "position:absolute; left:50%; bottom:28px; transform:translateX(-50%); background:#26241F; color:#EFE9DB; font-family:'Hanken Grotesk'; font-size:13px; font-weight:600; padding:11px 18px; border-radius:11px; box-shadow:0 8px 24px rgba(0,0,0,0.22); animation:authIn 0.2s ease both; z-index:50; white-space:nowrap;",
+    };
+  }
+}
+</script>
+</body>
+</html>

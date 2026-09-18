@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  doc-page { font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #2A2823; }
+  .sheet-title { display:flex; align-items:baseline; justify-content:space-between; border-bottom:1.5px solid #2A2823; padding-bottom:8px; margin-bottom:18px; }
+  .sheet-title h1 { font-size:22px; font-weight:800; letter-spacing:-0.01em; margin:0; }
+  .sheet-title .k { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#9A9280; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; justify-content:center; }
+  .tile { display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .cap { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.06em; color:#5C4420; text-align:center; }
+  .fm { position:relative; border-radius:12px; overflow:hidden; border:1px solid #E2DACB; box-shadow:0 6px 18px rgba(0,0,0,0.10); background:#E8E1D3; }
+</style>
+</helmet>
+
+<doc-page size="letter" orientation="landscape" margin="0.5in">
+
+  <section class="page">
+    <div class="sheet-title"><h1>Rolls — Mobile screens</h1><span class="k">Contact sheet · 1 / 2</span></div>
+    <div class="row">
+      <div class="tile"><span class="cap">Shelf (home)</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="home" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Frame logging</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Frame Logging Screen" demo="true" mode="mobile" variant="A" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Cosmos · Calendar</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="10" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Cosmos · Map</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="52" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Cosmos · Globe</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="cosmos" zoom0="92" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Auth · Sign in</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Auth Screen" mode="mobile" screen="login" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Settings / Account</span>
+        <div class="fm" style="width:120px; height:260px;"><div style="width:390px; height:844px; transform:scale(0.3077); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="mobile" variant="C" view="home" sheet0="profile" style="width:390px;height:844px;" hint-size="390px,844px"></dc-import></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="sheet-title"><h1>Rolls — Desktop &amp; Auth</h1><span class="k">Contact sheet · 2 / 2</span></div>
+    <div class="row">
+      <div class="tile"><span class="cap">Desktop · Shelf</span>
+        <div class="fm" style="width:460px; height:288px;"><div style="width:1280px; height:800px; transform:scale(0.3593); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="desktop" view="home" style="width:1280px;height:800px;" hint-size="1280px,800px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Desktop · Cosmos (Globe)</span>
+        <div class="fm" style="width:460px; height:288px;"><div style="width:1280px; height:800px; transform:scale(0.3593); transform-origin:top left;"><dc-import name="Opening Screen" demo="true" mode="desktop" view="cosmos" zoom0="92" style="width:1280px;height:800px;" hint-size="1280px,800px"></dc-import></div></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:18px;">
+      <div class="tile"><span class="cap">Auth · Create account</span>
+        <div class="fm" style="width:460px; height:288px;"><div style="width:1280px; height:800px; transform:scale(0.3593); transform-origin:top left;"><dc-import name="Auth Screen" mode="desktop" screen="signup" style="width:1280px;height:800px;" hint-size="1280px,800px"></dc-import></div></div>
+      </div>
+      <div class="tile"><span class="cap">Auth · Reset link sent</span>
+        <div class="fm" style="width:460px; height:288px;"><div style="width:1280px; height:800px; transform:scale(0.3593); transform-origin:top left;"><dc-import name="Auth Screen" mode="desktop" screen="sent" style="width:1280px;height:800px;" hint-size="1280px,800px"></dc-import></div></div>
+      </div>
+    </div>
+  </section>
+
+</doc-page>
+</x-dc>
+</body>
+</html>

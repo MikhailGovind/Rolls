@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  doc-page { font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #2A2823; }
+  h1 { font-weight: 800; font-size: 30px; letter-spacing: -0.02em; margin: 34px 0 6px; }
+  h2 { font-weight: 800; font-size: 20px; letter-spacing: -0.01em; margin: 32px 0 10px; padding-bottom: 6px; border-bottom: 1.5px solid #E2DACB; break-after: avoid; }
+  h3 { font-weight: 700; font-size: 15px; margin: 20px 0 6px; break-after: avoid; }
+  p, li { font-size: 13px; line-height: 1.6; color: #46423A; }
+  strong { color: #2A2823; font-weight: 700; }
+  ul, ol { margin: 6px 0; padding-left: 20px; }
+  li { margin-bottom: 3px; }
+  code, .mono { font-family: 'DM Mono', monospace; font-size: 12px; background: #F1ECE0; padding: 1px 5px; border-radius: 4px; color: #5C4420; }
+  .lede { font-size: 15px; line-height: 1.65; color: #2A2823; }
+  .meta { display: flex; gap: 26px; flex-wrap: wrap; margin: 14px 0 4px; font-size: 12px; }
+  .meta b { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #9A9280; font-weight: 500; margin-bottom: 2px; }
+  .callout { break-inside: avoid; background: #F4EFE3; border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .callout .h { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A6134; margin: 0 0 5px; }
+  .callout.warn { background: #F7ECE6; }
+  .callout.warn .h { color: #A5301F; }
+  table.spec { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  table.spec th { text-align: left; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #8B8270; border-bottom: 1.5px solid #2A2823; padding: 5px 8px; }
+  table.spec td { border-bottom: 1px solid #E2DACB; padding: 6px 8px; vertical-align: top; line-height: 1.45; color: #46423A; }
+  .phase { break-inside: avoid; border: 1.5px solid #E2DACB; border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .phase .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .phase .n { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #9A9280; }
+  .phase .t { font-weight: 800; font-size: 15px; margin: 0; }
+  .phase .out { font-size: 12px; color: #5C4420; font-family: 'DM Mono', monospace; }
+  .stop { background: #EFEAD9; border-radius: 9px; padding: 9px 12px; margin-top: 9px; font-size: 12px; color: #46423A; }
+  .stop b { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6134; display: block; margin-bottom: 2px; }
+  a { color: #8A6134; }
+  a:hover { color: #5C4420; }
+</style>
+</helmet>
+
+<doc-page margin="0.85in">
+  <div slot="header" style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:#B7AE9B; padding-bottom:8px;">Rolls · Build Plan to a Usable App</div>
+  <div slot="footer" style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.1em; color:#B7AE9B; padding-top:8px; text-align:right;">Companion to the Design &amp; Technical Specification</div>
+
+  <h1>Build Plan</h1>
+  <p class="lede">Getting Rolls from a complete design prototype to an app you can install on your phone, log real rolls into, and sign into from any device. Written for one concentrated build session, sequenced so that every stopping point leaves a working app.</p>
+
+  <div class="meta">
+    <div><b>Target</b>Synced account, offline-capable</div>
+    <div><b>Devices</b>iPhone · Desktop browser</div>
+    <div><b>Repo</b>MikhailGovind/Rolls</div>
+    <div><b>Written</b>18 Sep 2026</div>
+  </div>
+
+  <h2>1 · The one decision that shapes everything</h2>
+  <p>You asked for a <strong>synced account</strong> and said it <strong>must work offline</strong>. Those two together dictate the order of work, and it is not the order you might expect: <strong>local-first, sync second.</strong></p>
+  <p>An app that works offline cannot treat the server as the source of truth — the phone has to be. So the correct build is a complete local app that happens to sync, not a cloud app with a cache bolted on. This is lucky, because it also matches your "usable for me, fastest" bias: the local app is the part that makes Rolls usable, and it comes first.</p>
+  <div class="callout">
+    <p class="h">Consequence</p>
+    <p style="margin:0;">If the credits run out halfway through this plan, you still end up with a real, installed, offline logbook holding your actual rolls. Sync is an upgrade to that, not a prerequisite for it. Nothing here is wasted work.</p>
+  </div>
+
+  <h2>2 · Honest state of the build</h2>
+  <h3>Working — design-complete and behaving correctly</h3>
+  <p>Shelf with sorting, filtering and swipe-delete · frame logging with the dial, wheel pickers and light conditions (including user-created ones) · load-a-new-roll including start-from-frame · end-of-roll summary into Done or Developing · scan matching with drag-reorder and trash · Cosmos as one continuous Calendar → Map → Globe zoom · six film-stock themes in light and dark with live switching · roll start and finish animations · the settings panel and profile editing.</p>
+
+  <h3>Broken or not real — these are what block "usable"</h3>
+  <table class="spec">
+    <thead><tr><th>Issue</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>Nothing persists</td><td>Every reload resets the app. The rolls you see are hardcoded demo data. This alone makes it unusable as a logbook.</td></tr>
+      <tr><td>Two sources of truth</td><td>The Shelf owns the roll list; the logging screen generates its own frame data from props. Edits in one do not reach the other, or the Cosmos. <strong>This is the deepest structural problem and the keystone of the plan.</strong></td></tr>
+      <tr><td>Auth is decorative</td><td>The screens are finished, but no accounts exist behind them. Sign-in currently just shows a message.</td></tr>
+      <tr><td>Images are in memory</td><td>Reference photos and scans vanish on reload.</td></tr>
+      <tr><td>Map is stylized, not real</td><td>No map tiles, no real geography, coordinates are demo values, no GPS.</td></tr>
+      <tr><td>Settings are stubs</td><td>Default film, Units and Export library do not act on anything yet.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Missing entirely</h3>
+  <p>A data layer · durable photo storage · real geolocation · an install path onto your phone · offline handling · backup and export · any account or sync infrastructure.</p>
+
+  <h2>3 · Goals</h2>
+  <h3>Short term — the finish line for these credits</h3>
+  <p>Rolls installed on your iPhone home screen and usable in the dark at a café with no signal: you load a roll, log frames as you shoot, attach photos, and nothing is ever lost. Your real rolls, not demo ones. A backup you can export.</p>
+  <h3>Long term — after the credits</h3>
+  <p>Accounts with real sign-in and multi-device sync · photos synced to cloud storage · real map tiles with GPS capture · then, if you still want it, a native build for the App Store and Play Store from the repo.</p>
+
+  <h2>4 · The plan, phase by phase</h2>
+  <p>Each phase ends with the app in a coherent, usable state. Phases 1–4 are the usable-app core; 5–7 are the upgrades.</p>
+
+  <div class="phase">
+    <div class="top"><p class="t">Clear the decks</p><span class="n">Phase 0 · small</span></div>
+    <p style="margin:0 0 4px;">Remove the demo rolls so the app starts empty with the first-run state that already exists. Make the Shelf, Cosmos and stats all read from an empty library without breaking.</p>
+    <p class="out">Outcome: a clean, honest starting point for your real data.</p>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">One source of truth, and it persists</p><span class="n">Phase 1 · the keystone</span></div>
+    <p style="margin:0 0 4px;">Build a single store module that owns everything: rolls, every frame's settings, custom light conditions, profile, default film, units, theme and appearance. Both screens read from it and write to it; the Cosmos derives its calendar and map from it. It saves to the device automatically on every change and reloads on open.</p>
+    <ul>
+      <li>Frame data moves out of the logging screen and into the store, so an edit to frame 12 immediately shows on the Shelf and in the Cosmos.</li>
+      <li>Settings become real: default film pre-fills new rolls, units drive the focus-distance display, custom light conditions survive restarts.</li>
+      <li>Every screen keeps its current design exactly — this is plumbing, not redesign.</li>
+    </ul>
+    <div class="stop"><b>Stop point</b>The app remembers everything. You can log a roll, close the app, come back tomorrow and continue. This is the single biggest step from prototype to tool.</div>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Photos that survive</p><span class="n">Phase 2</span></div>
+    <p style="margin:0 0 4px;">Store reference photos and scans durably on the device rather than in memory, downscaling on import so a roll of 36 scans does not fill your phone. Scan matching writes into the store, so matched scans appear on their frames permanently.</p>
+    <p class="out">Outcome: full photo support — reference shots and scans, kept.</p>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Installed and offline</p><span class="n">Phase 3 · the usable finish line</span></div>
+    <p style="margin:0 0 4px;">Turn Rolls into an installable app: an app manifest, the roll-canister icon at every size, and a service worker that caches the app so it opens and runs with no signal. Then you add it to your iPhone home screen and it behaves like an app — full screen, no browser chrome, works on a plane.</p>
+    <div class="stop"><b>Stop point</b>This is "usable for me". Rolls is on your phone, holds your real rolls, and works offline. If the credits end here, you have the app.</div>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Backup and export</p><span class="n">Phase 4 · cheap insurance</span></div>
+    <p style="margin:0 0 4px;">Make Export library real: your whole library out as a single file (all rolls, frames and photos) that you can keep, plus re-import to restore. Small job, disproportionate value — it is your safety net until sync exists, and your escape hatch forever.</p>
+    <p class="out">Outcome: your data is yours, and recoverable.</p>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Real accounts and sync</p><span class="n">Phase 5 · the upgrade you asked for</span></div>
+    <p style="margin:0 0 4px;">Wire the finished Auth screens to real sign-up, sign-in and password reset, then sync the library: local changes queue up and push when you have signal, and signing in on another device pulls everything down. Photos stay local at this stage; the settings data syncs first because it is small, fast and the part you would hate to lose.</p>
+    <ul>
+      <li>Requires a Supabase project — see §6.</li>
+      <li>Conflict handling is last-write-wins per record, which is correct and sufficient for one person on two devices.</li>
+    </ul>
+    <div class="stop"><b>Stop point</b>Your stated target: sign in anywhere, your rolls are there.</div>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Photos in the cloud</p><span class="n">Phase 6</span></div>
+    <p style="margin:0 0 4px;">Upload photos in the background to private cloud storage and pull them on other devices, keeping the local copy as the fast path. Deliberately after metadata sync: images are the slowest, largest and most expensive part, and the app is fully usable without them syncing.</p>
+  </div>
+
+  <div class="phase">
+    <div class="top"><p class="t">Real map and GPS</p><span class="n">Phase 7</span></div>
+    <p style="margin:0 0 4px;">Replace the stylized map with real map tiles behind the existing Cosmos zoom continuum, and capture real coordinates when you log a frame, with manual override. The Calendar → Map → Globe feel is preserved; only the map surface becomes real.</p>
+    <ul>
+      <li>Requires a free tile API key — see §6.</li>
+      <li>Kept last on purpose: it is the most visually satisfying item and the least necessary for logging film.</li>
+    </ul>
+  </div>
+
+  <h2>5 · What I recommend for the credits expiring tomorrow</h2>
+  <p>Do <strong>Phases 0 → 4</strong> in one run, in that order, and stop. That sequence is self-contained, has no external dependencies, and ends with an installed offline app holding your real rolls plus a backup file. It is the highest ratio of "actually usable" to "credits spent".</p>
+  <p>Start Phase 5 only if there is clearly time left <em>and</em> your Supabase project already exists. Sync is the one phase that can half-land badly — a broken sync is worse than no sync — so it should never be the thing that runs out of credits mid-way.</p>
+  <div class="callout warn">
+    <p class="h">Sequencing rule</p>
+    <p style="margin:0;">Never begin a phase we cannot finish. Each phase above is a clean commit point; half a phase is technical debt you will pay for later at full price.</p>
+  </div>
+
+  <h2>6 · What I need from you</h2>
+  <table class="spec">
+    <thead><tr><th>Needed</th><th>For</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td>Nothing</td><td>Phases 0–4</td><td>Ready now — I can start immediately</td></tr>
+      <tr><td>HTTPS hosting</td><td>Installing on your iPhone (Phase 3)</td><td>Before Phase 3 ends. Free tier of any static host is fine; your repo can deploy straight to one.</td></tr>
+      <tr><td>Supabase project URL + anon key</td><td>Accounts and sync (Phase 5)</td><td>Before Phase 5. I will give you the exact table and security SQL to paste in.</td></tr>
+      <tr><td>Map tile API key</td><td>Real map (Phase 7)</td><td>Before Phase 7. Free tier is ample for one user.</td></tr>
+      <tr><td>Your real roll data</td><td>Making it yours</td><td>Any time after Phase 1 — just start logging.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7 · Risks, stated plainly</h2>
+  <table class="spec">
+    <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>iPhone can evict a web app's stored data if the app goes unused for weeks</td><td>Phase 4 export, then Phase 5 sync. This is the main reason backup comes before sync.</td></tr>
+      <tr><td>Scans are large; phone storage limits are real</td><td>Downscale on import in Phase 2; keep your full-resolution originals on your computer. Rolls is a logbook, not an archive.</td></tr>
+      <tr><td>Sync conflicts across two devices</td><td>Last-write-wins per record with timestamps. Adequate for a single user; revisit only if you ever share a library.</td></tr>
+      <tr><td>Credits run out mid-phase</td><td>The phase ordering above. Every phase boundary is a working app.</td></tr>
+      <tr><td>An installed web app is not an App Store app</td><td>True, and out of scope for these credits. It looks and behaves like an app on your home screen; a native build is a later, separate project from the repo.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>8 · Priorities, from your answers</h2>
+  <p>You named frame-logging accuracy, the dial feel, the Cosmos calendar, the map and globe, scan matching, themes, and export as what you would miss. All but the real map are already designed and working; this plan makes them <em>durable</em>, which is the thing standing between them and daily use. Export moves earlier than it otherwise would because you named it — it lands in Phase 4 rather than being an afterthought.</p>
+  <p>The map and globe are the one priority I am deliberately scheduling last, because logging film does not depend on them and they need an external key. If you would rather have the real map than cloud photo sync, say so and I will swap Phases 6 and 7.</p>
+
+  <h2>9 · Revision history</h2>
+  <table class="spec">
+    <thead><tr><th>Date</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td>18 Sep 2026 · later</td><td><strong>Phases 0–4 complete.</strong> Store + persistence, photos in IndexedDB, installable app entry (<span class="mono">app.dc.html</span>) with offline service worker, backup/CSV export and restore. Next: host over HTTPS and Add to Home Screen; then Phase 5 when a Supabase project exists.</td></tr>
+      <tr><td>18 Sep 2026</td><td>Initial build plan — state of the build, local-first sequencing rationale, seven phases, prerequisites, risks.</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:26px; font-size:11px; color:#B7AE9B; font-family:'DM Mono',monospace;">— Companion to <em>Rolls · Design &amp; Technical Specification</em>. Updated as the build progresses.</p>
+</doc-page>
+</x-dc>
+</body>
+</html>

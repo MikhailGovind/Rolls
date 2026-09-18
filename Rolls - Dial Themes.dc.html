@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; padding: 0; background: #DAD3C4; }
+a { color: #2A2823; } a:hover { color: #5C4420; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; box-sizing:border-box; padding:44px 48px 64px; font-family:'Hanken Grotesk',system-ui,sans-serif; color:#2A2823;">
+  <span style="display:block; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.14em; color:#8B8270; margin-bottom:6px;">ROUGH · THEME-ADAPTIVE DIAL</span>
+  <span style="display:block; font-size:22px; font-weight:800; margin-bottom:6px;">Dial colors pulled from each theme</span>
+  <span style="display:block; font-size:13px; color:#7A7264; margin-bottom:28px;">Bar = theme button color · ticks = theme paper · current frame keeps the roll's gold accent. First card is the current fixed film-black for comparison.</span>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:18px;">
+    <sc-for list="{{ samples }}" as="sm" hint-placeholder-count="13">
+      <div style="{{ sm.cardStyle }}">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px;"><span style="{{ sm.nameStyle }}">{{ sm.name }}</span><span style="{{ sm.modeStyle }}">{{ sm.mode }}</span></div>
+        <div style="{{ sm.barStyle }}">
+          <div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(36,1fr); align-items:center; padding:0 12px;">
+            <sc-for list="{{ sm.ticks }}" as="tk" hint-placeholder-count="36"><div style="{{ tk.style }}"></div></sc-for>
+          </div>
+        </div>
+        <div style="{{ sm.hintStyle }}">FRAME 07 / 36 · drag to wind</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { import('./themes.js').then((m) => { this._m = m; this.forceUpdate(); }); }
+  hx(c) { const n = c.replace('#',''); return [parseInt(n.slice(0,2),16), parseInt(n.slice(2,4),16), parseInt(n.slice(4,6),16)]; }
+  hex(r,g,b) { return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
+  mix(a,b,t) { const A=this.hx(a), B=this.hx(b); return this.hex(A[0]+(B[0]-A[0])*t, A[1]+(B[1]-A[1])*t, A[2]+(B[2]-A[2])*t); }
+  sample(name, mode, v, fixed) {
+    const barBase = fixed ? '#1d1a14' : v.btn;
+    const barTop = this.mix(barBase, '#000000', 0.35), barMid = this.mix(barBase, '#ffffff', fixed ? 0.06 : 0.10);
+    const tickDim = fixed ? 'rgba(255,255,255,0.20)' : this.mix(barBase, v.paper, 0.32);
+    const tickShot = fixed ? 'rgba(255,255,255,0.55)' : this.mix(barBase, v.paper, 0.72);
+    const gold = '#E0B267';
+    const ticks = Array.from({length:36}).map((_,i) => {
+      const n = i+1, cur = n === 7, shot = n <= 7;
+      return { style: { width:'2px', justifySelf:'center', borderRadius:'1px',
+        height: cur ? '18px' : (shot ? '12px' : '9px'),
+        background: cur ? gold : (shot ? tickShot : tickDim),
+        boxShadow: cur ? '0 0 8px rgba(224,178,103,0.8)' : 'none' } };
+    });
+    return { name, mode, ticks,
+      cardStyle: 'border-radius:16px; padding:16px 18px 14px; background:' + v.paper + '; border:1px solid rgba(0,0,0,0.14);',
+      nameStyle: "font-size:14px; font-weight:800; color:" + v.ink + ";",
+      modeStyle: "font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.1em; color:" + v.muted + ";",
+      barStyle: 'position:relative; height:50px; border-radius:12px; overflow:hidden; background:' + this.mix(barBase, '#000000', 0.12) + '; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.28);',
+      hintStyle: "text-align:center; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:" + v.muted + "; margin-top:7px;" };
+  }
+  renderVals() {
+    if (!this._m) return { samples: [] };
+    const m = this._m, out = [];
+    out.push(this.sample('Current — fixed film-black', 'ALL THEMES', m.THEMES[m.THEME_ORDER[0]].light, true));
+    m.THEME_ORDER.forEach((n) => {
+      out.push(this.sample(n, 'LIGHT', m.THEMES[n].light, false));
+      out.push(this.sample(n, 'DARK', m.THEMES[n].dark, false));
+    });
+    return { samples: out };
+  }
+}
+</script>
+</body>
+</html>

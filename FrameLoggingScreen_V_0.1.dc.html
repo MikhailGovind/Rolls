@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.rolls-scroll::-webkit-scrollbar { width: 0; height: 0; }
+.rolls-scroll { scrollbar-width: none; }
+.wheel::-webkit-scrollbar { width: 0; }
+.wheel { scrollbar-width: none; }
+</style>
+</helmet>
+
+<div style="position:relative; height:100%; width:100%; overflow:hidden; background:{{ paper }}; font-family:'Hanken Grotesk', system-ui, sans-serif; color:#2A2823; -webkit-font-smoothing:antialiased;">
+
+  <!-- hidden file inputs for image slots -->
+  <input type="file" accept="image/*" ref="{{ intendedRef }}" onChange="{{ onIntendedFile }}" style="display:none;" />
+  <input type="file" accept="image/*" ref="{{ scanRef }}" onChange="{{ onScanFile }}" style="display:none;" />
+
+  <!-- ============ MOBILE — VARIANT A : Film frame ============ -->
+  <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+  <div style="height:100%; display:flex; flex-direction:column; min-width:0;">
+    <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto; padding:52px 14px 14px;">
+
+      <!-- film header strip — drag L/R to change frame -->
+      <div onPointerDown="{{ beginDrag }}" onPointerMove="{{ moveDrag }}" onPointerUp="{{ endDrag }}" onPointerLeave="{{ endDrag }}" style="border-radius:14px; overflow:hidden; background:{{ stripBg }}; box-shadow:{{ heroShadow }}; margin-bottom:11px; cursor:grab; touch-action:pan-y; user-select:none;">
+        <div style="transform:{{ headerShift }}; transition:transform 0.13s ease;">
+          <div style="display:flex; gap:9px; padding:7px 10px 0; overflow:hidden;"><sc-for list="{{ holes }}" as="h" hint-placeholder-count="22"><div style="flex:none; width:13px; height:8px; border-radius:2px; background:{{ paper }};"></div></sc-for></div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:9px 16px 10px;">
+            <div style="display:flex; flex-direction:column; gap:3px; min-width:0;">
+              <span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:{{ accent }};">{{ format }}</span>
+              <button onClick="{{ openRollName }}" onPointerDown="{{ stopDrag }}" style="appearance:none; background:transparent; border:none; padding:0; text-align:left; cursor:text; display:flex; align-items:center; gap:7px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:18px; font-weight:600; color:#EFE9DB; line-height:1;">{{ rollName }}</span><span style="font-family:'Hanken Grotesk'; font-size:13px; color:#6E675B;">✎</span></button>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:3px; font-family:'DM Mono',monospace;"><span style="font-size:30px; color:#EFE9DB; line-height:1;">{{ frameLabel }}</span><span style="font-size:14px; color:#8C8576;">/ {{ totalLabel }}</span></div>
+          </div>
+          <div style="display:flex; gap:9px; padding:0 10px 7px; overflow:hidden;"><sc-for list="{{ holes }}" as="h" hint-placeholder-count="22"><div style="flex:none; width:13px; height:8px; border-radius:2px; background:{{ paper }};"></div></sc-for></div>
+        </div>
+      </div>
+
+      <!-- frame tick indicator -->
+      <div style="display:flex; gap:2px; align-items:flex-end; height:20px; margin-bottom:14px; padding:0 2px;"><sc-for list="{{ ticks }}" as="t" hint-placeholder-count="36"><div style="{{ t.style }}"></div></sc-for></div>
+
+      <!-- roll setup : film + camera (roll-wide) -->
+      <div style="display:flex; gap:9px; margin-bottom:12px;">
+        <button onClick="{{ openFilm }}" style="appearance:none; flex:1; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:10px 13px; display:flex; flex-direction:column; gap:3px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Film · roll</span><span style="font-family:'Hanken Grotesk'; font-size:14px; font-weight:600; color:#2A2823; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ film }}</span></button>
+        <button onClick="{{ openCamera }}" style="appearance:none; flex:1; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:10px 13px; display:flex; flex-direction:column; gap:3px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Camera · roll</span><span style="font-family:'Hanken Grotesk'; font-size:14px; font-weight:600; color:#2A2823; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ camera }}</span></button>
+      </div>
+
+      <!-- dual image slots -->
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <button onClick="{{ pickIntended }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:12px; overflow:hidden; height:148px; background:repeating-linear-gradient(135deg,#D9D1C0 0 11px,#D2C9B6 11px 22px); box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><sc-if value="{{ hasIntended }}" hint-placeholder-val="{{ false }}"><img src="{{ intendedSrc }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" /></sc-if><span style="position:absolute; top:8px; left:8px; z-index:2; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:2px 6px; border-radius:5px;">INTENDED</span><sc-if value="{{ noIntended }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:#938A77;">+ reference</span></sc-if></button>
+        <button onClick="{{ pickScan }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:12px; overflow:hidden; height:148px; background:repeating-linear-gradient(135deg,#D9D1C0 0 11px,#D2C9B6 11px 22px); box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><sc-if value="{{ hasScan }}" hint-placeholder-val="{{ false }}"><img src="{{ scanSrc }}" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" /></sc-if><span style="position:absolute; top:8px; left:8px; z-index:2; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:2px 6px; border-radius:5px;">SCAN</span><sc-if value="{{ noScan }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:#938A77;">+ scan</span></sc-if></button>
+      </div>
+
+      <!-- exposure grid 2x2 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px;">
+        <button onClick="{{ openAperture }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 13px; display:flex; flex-direction:column; gap:5px; box-shadow:{{ cardShadow }};"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Aperture</span><span style="font-family:'DM Mono',monospace; font-size:23px; color:#2A2823; line-height:1;">{{ aperture }}</span></button>
+        <button onClick="{{ openShutter }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 13px; display:flex; flex-direction:column; gap:5px; box-shadow:{{ cardShadow }};"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Shutter</span><span style="font-family:'DM Mono',monospace; font-size:23px; color:#2A2823; line-height:1;">{{ shutter }}</span></button>
+        <button onClick="{{ openIso }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 13px; display:flex; flex-direction:column; gap:5px; box-shadow:{{ cardShadow }};"><span style="display:flex; align-items:center; gap:6px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">ISO</span><span style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.08em; color:{{ accentDeep }}; border:1px solid rgba(176,127,55,0.4); border-radius:4px; padding:1px 4px;">{{ isoTag }}</span></span><span style="font-family:'DM Mono',monospace; font-size:23px; color:#2A2823; line-height:1;">{{ iso }}</span></button>
+        <button onClick="{{ openFocus }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 13px; display:flex; flex-direction:column; gap:5px; box-shadow:{{ cardShadow }};"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Focus</span><span style="font-family:'DM Mono',monospace; font-size:23px; color:#2A2823; line-height:1;">{{ focus }}</span></button>
+      </div>
+
+      <!-- lens -->
+      <button onClick="{{ openLens }}" style="appearance:none; width:100%; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 14px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;"><span style="font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Lens</span><span style="font-family:'DM Mono',monospace; font-size:16px; color:#2A2823;">{{ lens }}</span></button>
+
+      <!-- light -->
+      <div style="margin-bottom:12px;">
+        <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280; margin-bottom:8px;">Light</span>
+        <div class="rolls-scroll" onWheel="{{ onChipWheel }}" style="display:flex; gap:7px; overflow-x:auto; padding-bottom:2px; touch-action:pan-x; -webkit-overflow-scrolling:touch;"><sc-for list="{{ lightChips }}" as="chip" hint-placeholder-count="10"><button onClick="{{ chip.onClick }}" style="{{ chip.style }}">{{ chip.label }}</button></sc-for></div>
+      </div>
+
+      <!-- location + stamp -->
+      <div style="display:flex; gap:9px; margin-bottom:11px;">
+        <button onClick="{{ openLocation }}" style="appearance:none; flex:1; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:11px 13px; display:flex; align-items:center; gap:9px;"><span style="flex:none; width:14px; height:14px; border-radius:50%; border:2px solid {{ accentDeep }}; box-sizing:border-box;"></span><span style="display:flex; flex-direction:column; gap:2px; min-width:0;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Location</span><span style="font-family:'Hanken Grotesk'; font-size:14px; color:#2A2823; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ location }}</span></span></button>
+        <button onClick="{{ openStamp }}" style="appearance:none; flex:none; cursor:pointer; text-align:left; background:{{ cardAlt }}; border:1px solid rgba(42,40,35,0.08); border-radius:13px; padding:11px 13px; display:flex; flex-direction:column; gap:2px; justify-content:center;"><span style="display:flex; align-items:center; gap:5px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Stamp</span><span style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; color:{{ accentDeep }}; border:1px solid rgba(176,127,55,0.4); border-radius:4px; padding:1px 3px;">{{ stampTag }}</span></span><span style="font-family:'DM Mono',monospace; font-size:13px; color:#5C564B;">{{ stampDate }} · {{ stampTime }}</span></button>
+      </div>
+
+      <!-- note -->
+      <button onClick="{{ openNote }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:transparent; border:1px dashed rgba(42,40,35,0.22); border-radius:13px; padding:12px 14px; font-family:'Hanken Grotesk',sans-serif; font-style:italic; font-size:14px; color:{{ noteColor }};">{{ noteShown }}</button>
+    </div>
+
+    <!-- bottom horizontal wind dial -->
+    <div style="flex:none; padding:11px 14px 28px; border-top:1px solid rgba(42,40,35,0.12); background:{{ paper }};">
+      <div onPointerDown="{{ beginDrag }}" onPointerMove="{{ moveDrag }}" onPointerUp="{{ endDrag }}" onPointerLeave="{{ endDrag }}" style="position:relative; height:50px; border-radius:13px; overflow:hidden; touch-action:pan-y; user-select:none; cursor:grab; background:linear-gradient(180deg,#1a1815 0%,#48433b 50%,#1a1815 100%); box-shadow:{{ dialShadow }};">
+        <div style="position:absolute; inset:0; background:repeating-linear-gradient(90deg, rgba(0,0,0,0.42) 0 1.5px, rgba(255,255,255,0.06) 1.5px 5px);"></div>
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:8px;"><span style="width:8px; height:8px; border-radius:50%; background:{{ accent }}; box-shadow:0 0 7px rgba(199,154,85,0.7);"></span><span style="font-family:'DM Mono',monospace; font-size:13px; color:#EFE9DB;">{{ frameLabel }}</span></div>
+        <button onClick="{{ windPrev }}" onPointerDown="{{ stopDrag }}" style="appearance:none; cursor:pointer; background:transparent; border:none; position:absolute; left:0; top:0; bottom:0; width:78px; display:flex; align-items:center; padding-left:14px; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.04em; color:#C0B6A1;">‹ PREV</button>
+        <button onClick="{{ windNext }}" onPointerDown="{{ stopDrag }}" style="appearance:none; cursor:pointer; background:transparent; border:none; position:absolute; right:0; top:0; bottom:0; width:78px; display:flex; align-items:center; justify-content:flex-end; padding-right:14px; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.04em; color:#E7C98A;">WIND ›</button>
+      </div>
+      <div style="text-align:center; font-family:'Hanken Grotesk'; font-size:10px; letter-spacing:0.06em; color:#9A9280; margin-top:7px;">drag the dial or the film header to move between frames</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ MOBILE — VARIANT B : Top-plate readout ============ -->
+  <sc-if value="{{ showB }}" hint-placeholder-val="{{ false }}">
+  <div class="rolls-scroll" style="height:100%; overflow-y:auto; padding:54px 16px 28px; display:flex; flex-direction:column; min-width:0;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:8px;">
+      <span style="font-family:'Hanken Grotesk',sans-serif; font-size:17px; font-weight:600; color:#2A2823;">{{ rollName }}</span>
+      <span style="font-family:'DM Mono',monospace; font-size:11px; color:#8B8270; letter-spacing:0.04em; white-space:nowrap;">{{ camera }}</span>
+    </div>
+    <div style="display:flex; gap:2px; align-items:flex-end; height:22px; margin-bottom:18px;"><sc-for list="{{ ticks }}" as="t" hint-placeholder-count="36"><div style="{{ t.style }}"></div></sc-for></div>
+
+    <div style="border-radius:16px; background:{{ stripBg }}; box-shadow:{{ heroShadow }}; padding:18px 18px 20px; margin-bottom:18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;"><span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.14em; color:{{ accent }};">FRAME {{ frameLabel }} / {{ totalLabel }}</span><span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.1em; color:#7C7565;">{{ film }}</span></div>
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:6px;">
+        <button onClick="{{ openAperture }}" style="appearance:none; cursor:pointer; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:0;"><span style="font-family:'DM Mono',monospace; font-size:27px; color:#EFE9DB; line-height:1;">{{ aperture }}</span><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.12em; color:#8B8270;">APERTURE</span></button>
+        <span style="width:1px; height:36px; background:rgba(255,255,255,0.12);"></span>
+        <button onClick="{{ openShutter }}" style="appearance:none; cursor:pointer; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:0;"><span style="font-family:'DM Mono',monospace; font-size:27px; color:#EFE9DB; line-height:1;">{{ shutter }}</span><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.12em; color:#8B8270;">SHUTTER</span></button>
+        <span style="width:1px; height:36px; background:rgba(255,255,255,0.12);"></span>
+        <button onClick="{{ openIso }}" style="appearance:none; cursor:pointer; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:0;"><span style="font-family:'DM Mono',monospace; font-size:27px; color:#EFE9DB; line-height:1;">{{ iso }}</span><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.12em; color:#8B8270;">ISO</span></button>
+        <span style="width:1px; height:36px; background:rgba(255,255,255,0.12);"></span>
+        <button onClick="{{ openFocus }}" style="appearance:none; cursor:pointer; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:0;"><span style="font-family:'DM Mono',monospace; font-size:27px; color:#EFE9DB; line-height:1;">{{ focus }}</span><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.12em; color:#8B8270;">FOCUS</span></button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;"><span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280; margin-bottom:8px;">Light</span><div class="rolls-scroll" onWheel="{{ onChipWheel }}" style="display:flex; gap:7px; overflow-x:auto; padding-bottom:2px; touch-action:pan-x; -webkit-overflow-scrolling:touch;"><sc-for list="{{ lightChips }}" as="chip" hint-placeholder-count="10"><button onClick="{{ chip.onClick }}" style="{{ chip.style }}">{{ chip.label }}</button></sc-for></div></div>
+
+    <button onClick="{{ openLocation }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:13px; padding:12px 14px; display:flex; align-items:center; gap:10px; margin-bottom:9px;"><span style="flex:none; width:14px; height:14px; border-radius:50%; border:2px solid {{ accentDeep }}; box-sizing:border-box;"></span><span style="font-family:'Hanken Grotesk'; font-size:14px; color:#2A2823; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ location }}</span><span style="font-family:'DM Mono',monospace; font-size:11px; color:#9A9280; white-space:nowrap;">{{ stampTime }}</span></button>
+    <button onClick="{{ openNote }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:transparent; border:1px dashed rgba(42,40,35,0.22); border-radius:13px; padding:12px 14px; font-family:'Hanken Grotesk',sans-serif; font-style:italic; font-size:14px; color:{{ noteColor }}; margin-bottom:22px;">{{ noteShown }}</button>
+
+    <div style="display:flex; align-items:center; justify-content:center; gap:22px; margin-top:auto;">
+      <button onClick="{{ windPrev }}" style="appearance:none; cursor:pointer; width:48px; height:48px; border-radius:50%; background:{{ cardAlt }}; border:1px solid rgba(42,40,35,0.12); font-size:20px; color:#6E675B;">‹</button>
+      <div onClick="{{ windNext }}" style="position:relative; width:104px; height:104px; border-radius:50%; cursor:pointer; background:repeating-conic-gradient(#1a1815 0 5deg,#48433b 5deg 10deg); box-shadow:0 10px 22px rgba(0,0,0,0.30), inset 0 0 0 1px rgba(0,0,0,0.45);"><div style="position:absolute; inset:15px; border-radius:50%; background:radial-gradient(circle at 38% 30%,#4d473e,#1f1d19); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 2px rgba(255,255,255,0.14), inset 0 -3px 7px rgba(0,0,0,0.55);"><span style="font-family:'DM Mono',monospace; font-size:26px; color:#EFE9DB;">{{ frameLabel }}</span></div><div style="position:absolute; top:5px; left:50%; transform:translateX(-50%); width:7px; height:7px; border-radius:50%; background:{{ accent }};"></div></div>
+      <button onClick="{{ windNext }}" style="appearance:none; cursor:pointer; width:48px; height:48px; border-radius:50%; background:{{ cardAlt }}; border:1px solid rgba(42,40,35,0.12); font-size:20px; color:#6E675B;">›</button>
+    </div>
+    <span style="text-align:center; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.16em; color:#8B8270; margin-top:10px;">WIND TO ADVANCE</span>
+  </div>
+  </sc-if>
+
+  <!-- ============ DESKTOP ============ -->
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100%; display:flex; background:{{ paperDeep }}; min-width:0;">
+
+    <!-- left rail : roll + clickable frames -->
+    <div class="rolls-scroll" style="width:262px; flex:none; height:100%; overflow-y:auto; background:{{ rail }}; border-right:1px solid rgba(42,40,35,0.10); padding:24px 20px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+        <div style="flex:none; width:34px; height:42px; position:relative;"><div style="position:absolute; left:9px; top:0; width:16px; height:4px; border-radius:2px 2px 0 0; background:#8B8270;"></div><div style="position:absolute; left:3px; top:4px; right:3px; bottom:0; border:1.5px solid #2A2823; border-radius:5px; background:{{ card }};"></div><div style="position:absolute; left:3px; top:22px; right:3px; height:8px; background:{{ accent }};"></div></div>
+        <div style="display:flex; flex-direction:column; gap:3px; min-width:0;">
+          <button onClick="{{ openRollName }}" style="appearance:none; background:transparent; border:none; padding:0; text-align:left; cursor:text; display:flex; align-items:center; gap:6px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:18px; font-weight:600; color:#2A2823; line-height:1.1;">{{ rollName }}</span><span style="font-size:12px; color:#9A9280;">✎</span></button>
+          <span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.06em; color:#8B8270;">{{ format }}</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:7px; margin-bottom:18px;">
+        <button onClick="{{ openFilm }}" style="appearance:none; flex:1; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.08); border-radius:9px; padding:8px 10px; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Film</span><span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:600; color:#2A2823; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ film }}</span></button>
+        <button onClick="{{ openCamera }}" style="appearance:none; flex:1; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.08); border-radius:9px; padding:8px 10px; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Camera</span><span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:600; color:#2A2823; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ camera }}</span></button>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><span style="font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Frames</span><span style="font-family:'DM Mono',monospace; font-size:12px; color:#5C564B;">{{ frameLabel }} / {{ totalLabel }}</span></div>
+      <div style="height:5px; border-radius:3px; background:#D7CFBE; overflow:hidden; margin-bottom:16px;"><div style="height:100%; width:{{ progressPct }}; background:{{ accentDeep }};"></div></div>
+      <div style="display:flex; flex-direction:column; gap:7px;"><sc-for list="{{ framesList }}" as="row" hint-placeholder-count="12"><button onClick="{{ row.onClick }}" style="{{ row.style }}"><span style="flex:none; font-family:'DM Mono',monospace; font-size:15px; color:{{ row.accent }};">{{ row.n }}</span><span style="flex:1; min-width:0; font-family:'DM Mono',monospace; font-size:12px; color:{{ row.metaColor }}; text-align:left; white-space:nowrap; overflow:hidden;">{{ row.ap }} · {{ row.sh }}</span><span style="font-family:'Hanken Grotesk'; font-size:11px; color:{{ row.lightColor }}; white-space:nowrap;">{{ row.light }}</span></button></sc-for></div>
+    </div>
+
+    <!-- center : header + image slots + bottom dial -->
+    <div style="flex:1; min-width:0; height:100%; display:flex; flex-direction:column;">
+      <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto; padding:30px 34px 16px; display:flex; flex-direction:column; align-items:center;">
+        <div style="width:100%; max-width:560px;">
+          <div onPointerDown="{{ beginDrag }}" onPointerMove="{{ moveDrag }}" onPointerUp="{{ endDrag }}" onPointerLeave="{{ endDrag }}" style="border-radius:14px; overflow:hidden; background:{{ stripBg }}; box-shadow:{{ heroShadow }}; margin-bottom:18px; cursor:grab; user-select:none;">
+            <div style="transform:{{ headerShift }}; transition:transform 0.13s ease;">
+              <div style="display:flex; gap:11px; padding:8px 12px 0; overflow:hidden;"><sc-for list="{{ holes }}" as="h" hint-placeholder-count="30"><div style="flex:none; width:15px; height:9px; border-radius:2px; background:{{ paper }};"></div></sc-for></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 20px;"><span style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.16em; color:{{ accent }};">{{ film }} · {{ format }}</span><span style="font-family:'DM Mono',monospace; font-size:13px; color:#8C8576;">FRAME <span style="color:#EFE9DB; font-size:20px;">{{ frameLabel }}</span> / {{ totalLabel }}</span></div>
+              <div style="display:flex; gap:11px; padding:0 12px 8px; overflow:hidden;"><sc-for list="{{ holes }}" as="h" hint-placeholder-count="30"><div style="flex:none; width:15px; height:9px; border-radius:2px; background:{{ paper }};"></div></sc-for></div>
+            </div>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <sc-if value="{{ hasIntended }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ pickIntended }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:14px; overflow:hidden; padding:0; display:block; background:#26241F; box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><img src="{{ intendedSrc }}" alt="" style="display:block; width:100%; height:auto;" /><span style="position:absolute; top:11px; left:11px; z-index:2; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:3px 7px; border-radius:5px;">INTENDED</span></button>
+            </sc-if>
+            <sc-if value="{{ noIntended }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ pickIntended }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:14px; overflow:hidden; height:300px; background:repeating-linear-gradient(135deg,#D9D1C0 0 13px,#D2C9B6 13px 26px); box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><span style="position:absolute; top:11px; left:11px; z-index:2; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:3px 7px; border-radius:5px;">INTENDED</span><span style="position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.08em; color:#938A77;">+ drop reference shot</span></button>
+            </sc-if>
+            <sc-if value="{{ hasScan }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ pickScan }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:14px; overflow:hidden; padding:0; display:block; background:#26241F; box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><img src="{{ scanSrc }}" alt="" style="display:block; width:100%; height:auto;" /><span style="position:absolute; top:11px; left:11px; z-index:2; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:3px 7px; border-radius:5px;">SCAN</span></button>
+            </sc-if>
+            <sc-if value="{{ noScan }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ pickScan }}" style="appearance:none; cursor:pointer; flex:1; min-width:0; position:relative; border:none; border-radius:14px; overflow:hidden; height:300px; background:repeating-linear-gradient(135deg,#D9D1C0 0 13px,#D2C9B6 13px 26px); box-shadow:inset 0 0 0 1px rgba(42,40,35,0.12);"><span style="position:absolute; top:11px; left:11px; z-index:2; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#7E7565; background:rgba(232,225,211,0.85); padding:3px 7px; border-radius:5px;">SCAN</span><span style="position:absolute; left:0; right:0; top:54%; transform:translateY(-50%); text-align:center; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.08em; color:#938A77;">+ drop scanned negative</span></button>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      <div style="flex:none; padding:14px 34px 22px; border-top:1px solid rgba(42,40,35,0.10); background:{{ paperDeep }}; display:flex; justify-content:center;">
+        <div style="width:100%; max-width:560px;">
+          <div onPointerDown="{{ beginDrag }}" onPointerMove="{{ moveDrag }}" onPointerUp="{{ endDrag }}" onPointerLeave="{{ endDrag }}" style="position:relative; height:52px; border-radius:13px; overflow:hidden; user-select:none; cursor:grab; background:linear-gradient(180deg,#1a1815 0%,#48433b 50%,#1a1815 100%); box-shadow:{{ dialShadow }};">
+            <div style="position:absolute; inset:0; background:repeating-linear-gradient(90deg, rgba(0,0,0,0.42) 0 1.5px, rgba(255,255,255,0.06) 1.5px 5px);"></div>
+            <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:9px;"><span style="width:8px; height:8px; border-radius:50%; background:{{ accent }}; box-shadow:0 0 7px rgba(199,154,85,0.7);"></span><span style="font-family:'DM Mono',monospace; font-size:14px; color:#EFE9DB;">FRAME {{ frameLabel }}</span></div>
+            <button onClick="{{ windPrev }}" onPointerDown="{{ stopDrag }}" style="appearance:none; cursor:pointer; background:transparent; border:none; position:absolute; left:0; top:0; bottom:0; width:120px; display:flex; align-items:center; padding-left:18px; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; color:#C0B6A1;">‹ PREVIOUS</button>
+            <button onClick="{{ windNext }}" onPointerDown="{{ stopDrag }}" style="appearance:none; cursor:pointer; background:transparent; border:none; position:absolute; right:0; top:0; bottom:0; width:120px; display:flex; align-items:center; justify-content:flex-end; padding-right:18px; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700; color:#E7C98A;">WIND ON ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right rail : editors -->
+    <div class="rolls-scroll" style="width:330px; flex:none; height:100%; overflow-y:auto; background:{{ rail }}; border-left:1px solid rgba(42,40,35,0.10); padding:26px 22px;">
+      <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280; margin-bottom:14px;">Exposure · frame {{ frameLabel }}</span>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:9px;">
+        <button onClick="{{ openAperture }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:5px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Aperture</span><span style="font-family:'DM Mono',monospace; font-size:22px; color:#2A2823; line-height:1;">{{ aperture }}</span></button>
+        <button onClick="{{ openShutter }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:5px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Shutter</span><span style="font-family:'DM Mono',monospace; font-size:22px; color:#2A2823; line-height:1;">{{ shutter }}</span></button>
+        <button onClick="{{ openIso }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:5px;"><span style="display:flex; align-items:center; gap:6px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">ISO</span><span style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.06em; color:{{ accentDeep }}; border:1px solid rgba(176,127,55,0.4); border-radius:4px; padding:1px 3px;">{{ isoTag }}</span></span><span style="font-family:'DM Mono',monospace; font-size:22px; color:#2A2823; line-height:1;">{{ iso }}</span></button>
+        <button onClick="{{ openFocus }}" style="appearance:none; width:100%; min-width:0; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; gap:5px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280;">Focus</span><span style="font-family:'DM Mono',monospace; font-size:22px; color:#2A2823; line-height:1;">{{ focus }}</span></button>
+      </div>
+      <button onClick="{{ openLens }}" style="appearance:none; width:100%; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:10px 13px; display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;"><span style="font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Lens</span><span style="font-family:'DM Mono',monospace; font-size:15px; color:#2A2823;">{{ lens }}</span></button>
+
+      <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9A9280; margin-bottom:10px;">Light</span>
+      <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px;"><sc-for list="{{ lightChips }}" as="chip" hint-placeholder-count="10"><button onClick="{{ chip.onClick }}" style="{{ chip.style }}">{{ chip.label }}</button></sc-for></div>
+
+      <button onClick="{{ openLocation }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; align-items:center; gap:10px; margin-bottom:9px;"><span style="flex:none; width:14px; height:14px; border-radius:50%; border:2px solid {{ accentDeep }}; box-sizing:border-box;"></span><span style="display:flex; flex-direction:column; gap:2px; min-width:0;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Location</span><span style="font-family:'Hanken Grotesk'; font-size:14px; color:#2A2823;">{{ location }}</span></span></button>
+      <button onClick="{{ openStamp }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:{{ card }}; border:1px solid rgba(42,40,35,0.10); border-radius:12px; padding:11px 13px; display:flex; align-items:center; gap:10px; margin-bottom:9px;"><span style="flex:none; width:14px; height:14px; border-radius:3px; border:2px solid {{ accentDeep }}; box-sizing:border-box;"></span><span style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1;"><span style="display:flex; align-items:center; gap:6px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Stamp</span><span style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.06em; color:{{ accentDeep }}; border:1px solid rgba(176,127,55,0.4); border-radius:4px; padding:1px 3px;">{{ stampTag }}</span></span><span style="font-family:'DM Mono',monospace; font-size:13px; color:#5C564B;">{{ stampDate }} · {{ stampTime }}</span></span></button>
+      <button onClick="{{ openNote }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:transparent; border:1px dashed rgba(42,40,35,0.22); border-radius:12px; padding:11px 14px; font-family:'Hanken Grotesk',sans-serif; font-style:italic; font-size:14px; color:{{ noteColor }};">{{ noteShown }}</button>
+    </div>
+
+  </div>
+  </sc-if>
+
+  <!-- ============ SHEET / DRAWER ============ -->
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheet }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ panelStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:600; color:#2A2823;">{{ sheetTitle }}</span><button onClick="{{ closeSheet }}" style="appearance:none; cursor:pointer; background:{{ paper }}; border:none; width:30px; height:30px; border-radius:50%; font-size:15px; color:#6E675B; line-height:1;">✕</button></div>
+
+    <sc-if value="{{ isWheel }}" hint-placeholder-val="{{ false }}">
+    <div style="position:relative;">
+      <div ref="{{ wheelRef }}" class="wheel" style="height:230px; overflow-y:auto; scroll-snap-type:y mandatory; padding:92px 0; -webkit-overflow-scrolling:touch;"><sc-for list="{{ wheelRows }}" as="opt" hint-placeholder-count="9"><div style="height:46px; scroll-snap-align:center; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:24px; color:#2A2823;">{{ opt.label }}</div></sc-for></div>
+      <div style="position:absolute; left:14px; right:14px; top:92px; height:46px; border-top:1px solid rgba(176,127,55,0.5); border-bottom:1px solid rgba(176,127,55,0.5); background:rgba(176,127,55,0.06); pointer-events:none; border-radius:8px;"></div>
+      <div style="position:absolute; left:0; right:0; top:0; height:92px; background:linear-gradient(180deg,{{ panel }} 30%,rgba(242,236,224,0)); pointer-events:none;"></div>
+      <div style="position:absolute; left:0; right:0; bottom:0; height:92px; background:linear-gradient(0deg,{{ panel }} 30%,rgba(242,236,224,0)); pointer-events:none;"></div>
+    </div>
+    <button onClick="{{ confirmWheel }}" style="appearance:none; width:100%; cursor:pointer; margin-top:16px; background:#26241F; color:#EFE9DB; border:none; border-radius:13px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Set</button>
+    </sc-if>
+
+    <sc-if value="{{ isPick }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; gap:8px; margin-bottom:6px;"><input value="{{ pickDraft }}" onChange="{{ onPickInput }}" placeholder="{{ pickPlaceholder }}" style="flex:1; min-width:0; box-sizing:border-box; border:1px solid rgba(42,40,35,0.12); border-radius:11px; background:{{ field }}; padding:11px 13px; font-family:'Hanken Grotesk'; font-size:14px; color:#2A2823; outline:none;" /><button onClick="{{ usePickDraft }}" style="appearance:none; flex:none; cursor:pointer; background:#26241F; color:#EFE9DB; border:none; border-radius:11px; padding:0 18px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700;">Use</button></div>
+    <p style="margin:0 2px 12px; font-family:'Hanken Grotesk'; font-size:12px; color:#9A9280;">Type your own, or pick from the list.</p>
+    <div style="display:flex; flex-direction:column;"><sc-for list="{{ pickRows }}" as="p" hint-placeholder-count="6"><button onClick="{{ p.onClick }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:transparent; border:none; border-bottom:1px solid rgba(42,40,35,0.08); padding:13px 4px; display:flex; align-items:center; gap:11px;"><span style="flex:none; width:9px; height:9px; border-radius:50%; background:{{ p.dot }};"></span><span style="font-family:'Hanken Grotesk'; font-size:15px; color:{{ p.color }}; font-weight:{{ p.weight }};">{{ p.label }}</span></button></sc-for></div>
+    </sc-if>
+
+    <sc-if value="{{ isText }}" hint-placeholder-val="{{ false }}">
+    <input value="{{ nameDraft }}" onChange="{{ onNameInput }}" placeholder="Roll name" style="width:100%; box-sizing:border-box; border:1px solid rgba(42,40,35,0.12); border-radius:12px; background:{{ field }}; padding:13px 14px; font-family:'Hanken Grotesk',sans-serif; font-size:17px; color:#2A2823; outline:none;" />
+    <p style="margin:9px 2px 0; font-family:'Hanken Grotesk'; font-size:12px; color:#9A9280;">Applies to the whole roll.</p>
+    <button onClick="{{ saveName }}" style="appearance:none; width:100%; cursor:pointer; margin-top:14px; background:#26241F; color:#EFE9DB; border:none; border-radius:13px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Save</button>
+    </sc-if>
+
+    <sc-if value="{{ isLocation }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; align-items:center; gap:9px; background:{{ paper }}; border:1px solid rgba(42,40,35,0.12); border-radius:11px; padding:11px 13px; margin-bottom:12px;"><span style="flex:none; width:13px; height:13px; border-radius:50%; border:2px solid #9A9280; box-sizing:border-box;"></span><input value="{{ locQuery }}" onChange="{{ onLocInput }}" placeholder="Search places" style="flex:1; min-width:0; border:none; background:transparent; outline:none; font-family:'Hanken Grotesk'; font-size:15px; color:#2A2823;" /></div>
+    <div style="display:flex; flex-direction:column;"><sc-for list="{{ locRows }}" as="loc" hint-placeholder-count="5"><button onClick="{{ loc.onClick }}" style="appearance:none; width:100%; text-align:left; cursor:pointer; background:transparent; border:none; border-bottom:1px solid rgba(42,40,35,0.08); padding:13px 4px; display:flex; align-items:center; gap:11px;"><span style="flex:none; width:12px; height:12px; border-radius:50%; border:2px solid {{ accentDeep }}; box-sizing:border-box;"></span><span style="font-family:'Hanken Grotesk'; font-size:15px; color:#2A2823;">{{ loc.label }}</span></button></sc-for></div>
+    </sc-if>
+
+    <sc-if value="{{ isStamp }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; gap:10px; margin-bottom:4px;">
+      <label style="flex:1; display:flex; flex-direction:column; gap:6px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Date</span><input type="date" value="{{ stampDateDraft }}" onChange="{{ onStampDate }}" style="width:100%; box-sizing:border-box; border:1px solid rgba(42,40,35,0.12); border-radius:11px; background:{{ field }}; padding:11px 12px; font-family:'DM Mono',monospace; font-size:14px; color:#2A2823; outline:none;" /></label>
+      <label style="flex:none; display:flex; flex-direction:column; gap:6px;"><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9A9280;">Time</span><input type="time" value="{{ stampTimeDraft }}" onChange="{{ onStampTime }}" style="box-sizing:border-box; border:1px solid rgba(42,40,35,0.12); border-radius:11px; background:{{ field }}; padding:11px 12px; font-family:'DM Mono',monospace; font-size:14px; color:#2A2823; outline:none;" /></label>
+    </div>
+    <p style="margin:9px 2px 0; font-family:'Hanken Grotesk'; font-size:12px; color:#9A9280;">Captured automatically — adjust if you logged it later.</p>
+    <button onClick="{{ saveStamp }}" style="appearance:none; width:100%; cursor:pointer; margin-top:14px; background:#26241F; color:#EFE9DB; border:none; border-radius:13px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Set stamp</button>
+    </sc-if>
+
+    <sc-if value="{{ isNote }}" hint-placeholder-val="{{ false }}">
+    <textarea value="{{ noteDraft }}" onChange="{{ onNoteInput }}" placeholder="What was the moment?" style="width:100%; box-sizing:border-box; min-height:120px; resize:none; border:1px solid rgba(42,40,35,0.12); border-radius:13px; background:{{ field }}; padding:14px; font-family:'Hanken Grotesk',sans-serif; font-size:15px; color:#2A2823; outline:none; line-height:1.5;"></textarea>
+    <button onClick="{{ saveNote }}" style="appearance:none; width:100%; cursor:pointer; margin-top:14px; background:#26241F; color:#EFE9DB; border:none; border-radius:13px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Save note</button>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="{{ toastStyle }}">{{ toast }}</div></sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mobile&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;mobile&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.wheelRef = React.createRef();
+    this.intendedRef = React.createRef();
+    this.scanRef = React.createRef();
+    this._scrolledFor = null;
+    this._toastTimer = null;
+    this.ROW = 46;
+    this._drag = false; this._x0 = 0; this._moved = 0;
+
+    this.options = {
+      aperture: ['f/1.4','f/2','f/2.8','f/4','f/5.6','f/8','f/11','f/16','f/22'],
+      shutter: ['1s','1/2','1/4','1/8','1/15','1/30','1/60','1/125','1/250','1/500','1/1000','B'],
+      iso: ['50','100','200','400','800','1600','3200'],
+      focus: ['0.5 m','0.7 m','1 m','1.5 m','2 m','2.5 m','3 m','5 m','10 m','∞'],
+      lens: ['28 mm','35 mm','50 mm','85 mm','135 mm'],
+    };
+    this.fieldKey = { aperture:'ap', shutter:'sh', iso:'iso', focus:'focus', lens:'lens' };
+    this.lights = ['Sunny','Open shade','Cloudy','Overcast','Golden hour','Blue hour','Indoor','Tungsten','Fluorescent','Flash','Mixed','Night'];
+    this.locResults = ['Shoreditch, London','Hackney Wick','Columbia Road E2','Victoria Park','Brick Lane','Regent\u2019s Canal'];
+
+    this.filmOptions = [
+      'Kodak Portra 400','Kodak Portra 160','Kodak Portra 800','Kodak Gold 200','Kodak ColorPlus 200',
+      'Kodak UltraMax 400','Kodak Ektar 100','Kodak Tri-X 400','Kodak T-Max 400','Kodak T-Max 3200',
+      'Kodak Ektachrome E100','Fujifilm Superia 400','Fujicolor C200','Fujifilm Pro 400H','Fujifilm Velvia 50',
+      'Fujifilm Provia 100F','Fujifilm Acros 100','CineStill 800T','CineStill 50D','Ilford HP5 Plus',
+      'Ilford Delta 3200','Ilford FP4 Plus','Lomography Color 400','Agfa Vista 200',
+    ];
+    this.cameraOptions = [
+      'Olympus Trip 35','Olympus Mju II (Stylus Epic)','Canon AF35M','Yashica T4','Yashica T5',
+      'Contax T2','Contax T3','Pentax K1000','Canon AE-1','Canon AE-1 Program','Nikon FM2','Nikon FE2',
+      'Minolta X-700','Leica M6','Canon Canonet QL17 GIII','Mamiya RB67','Mamiya RZ67','Hasselblad 500C/M',
+      'Pentax 645','Nikon F3','Olympus OM-1','Minolta XD-7','Konica C35','Ricoh GR1',
+      'Canon A-1','Pentax Spotmatic','Leica M3','Pentax 67','Rolleiflex 2.8F','Yashica Mat-124G',
+      'Polaroid SX-70','Fujifilm X100V','Ricoh GR III','Sony A7 III','Leica Q2',
+    ];
+
+    this.filmPalettes = {
+      'Kodak Portra 400': { strip:'#2A2620', accent:'#D8A24B', deep:'#A8732E' },
+      'Kodak Portra 160': { strip:'#2A2620', accent:'#D8A24B', deep:'#A8732E' },
+      'Kodak Portra 800': { strip:'#2A2620', accent:'#D8A24B', deep:'#A8732E' },
+      'Kodak Gold 200':   { strip:'#23200F', accent:'#E9B824', deep:'#7E2E86' },
+      'Kodak ColorPlus 200': { strip:'#241A10', accent:'#E0A21C', deep:'#C0392B' },
+      'Kodak UltraMax 400':  { strip:'#241410', accent:'#F2C500', deep:'#C62828' },
+      'Kodak Ektar 100':  { strip:'#261411', accent:'#E0512F', deep:'#9C2A1B' },
+      'Kodak Ektachrome E100': { strip:'#13202A', accent:'#E8B53A', deep:'#2A7DB0' },
+      'Kodak Tri-X 400':  { strip:'#1C1A17', accent:'#CBC4B6', deep:'#6E675B' },
+      'Kodak T-Max 400':  { strip:'#1C1A17', accent:'#CBC4B6', deep:'#6E675B' },
+      'Kodak T-Max 3200': { strip:'#1A1A1B', accent:'#C9CBCD', deep:'#6B6C6E' },
+      'Fujifilm Superia 400': { strip:'#0F241A', accent:'#3CB24E', deep:'#0E7A3A' },
+      'Fujicolor C200':   { strip:'#0F241A', accent:'#3CB24E', deep:'#0E7A3A' },
+      'Fujifilm Pro 400H':{ strip:'#12241F', accent:'#74C8A8', deep:'#2E8C72' },
+      'Fujifilm Velvia 50':{ strip:'#2A1018', accent:'#E23A6D', deep:'#9C1F4A' },
+      'Fujifilm Provia 100F':{ strip:'#10202A', accent:'#3FA7C2', deep:'#1F6E8C' },
+      'Fujifilm Acros 100':{ strip:'#191A1B', accent:'#C4C8CA', deep:'#67696B' },
+      'CineStill 800T':   { strip:'#0E2026', accent:'#26A9B7', deep:'#D23B3B' },
+      'CineStill 50D':    { strip:'#0E2026', accent:'#36B5C2', deep:'#C9A24B' },
+      'Ilford HP5 Plus':  { strip:'#1A1A1B', accent:'#C9CBCD', deep:'#6B6C6E' },
+      'Ilford Delta 3200':{ strip:'#19191A', accent:'#C2C4C6', deep:'#6B6C6E' },
+      'Ilford FP4 Plus':  { strip:'#1A1A1B', accent:'#C9CBCD', deep:'#6B6C6E' },
+      'Lomography Color 400': { strip:'#2A140A', accent:'#F2622A', deep:'#D0142A' },
+      'Agfa Vista 200':   { strip:'#2A1208', accent:'#F26A1B', deep:'#C0392B' },
+    };
+    this.defaultPalette = { strip:'#26241F', accent:'#C79A55', deep:'#B07F37' };
+
+    const presets = {
+      9:  { ap:'f/8',   sh:'1/500', light:'Sunny',       location:'Brick Lane',          time:'11:05' },
+      10: { ap:'f/5.6', sh:'1/250', light:'Cloudy',      location:'Brick Lane',          time:'11:40' },
+      11: { ap:'f/4',   sh:'1/125', light:'Open shade',  location:'Columbia Road E2',    time:'15:20' },
+      12: { ap:'f/2.8', sh:'1/250', light:'Cloudy',      location:'Shoreditch, London',  time:'16:02' },
+    };
+    const frames = {};
+    for (let i = 1; i <= 12; i++) {
+      frames[i] = { ap:'f/5.6', sh:'1/250', iso:'400', focus:'2.5 m', lens:'50 mm', light:'Cloudy', location:'Shoreditch, London', note:'', intended:'', scan:'', date:'2026-06-20', time:'14:32', stampAuto:true, ...(presets[i] || {}) };
+    }
+
+    this.state = {
+      roll: { code:'014', name:'Summer', film:'Kodak Portra 400', camera:'Nikon FM2', format:'35mm', box:'400', capacity:36 },
+      frames, cur: 12, maxFrame: 12,
+      sheet: null, wheelIndex: 0, locQuery: '', noteDraft: '', nameDraft: '', pickDraft: '',
+      stampDateDraft: '', stampTimeDraft: '', toast: null, dragDX: 0,
+    };
+  }
+
+  palette(film) { return this.filmPalettes[film] || this.defaultPalette; }
+
+  fmtDate(d) {
+    const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const p = (d || '').split('-');
+    if (p.length < 3) return d || '';
+    return parseInt(p[2], 10) + ' ' + (m[parseInt(p[1], 10) - 1] || '');
+  }
+
+  cf() { return this.state.frames[this.state.cur] || {}; }
+  setFrameVal(key, v) { this.setState(s => ({ frames: { ...s.frames, [s.cur]: { ...s.frames[s.cur], [key]: v } } })); }
+  setRoll(k, v) { this.setState(s => ({ roll: { ...s.roll, [k]: v } })); }
+
+  openSheet = (sheet) => {
+    if (this.options[sheet]) {
+      const key = this.fieldKey[sheet];
+      const idx = Math.max(0, this.options[sheet].indexOf(this.cf()[key]));
+      this._scrolledFor = null;
+      this.setState({ sheet, wheelIndex: idx });
+    } else if (sheet === 'note') {
+      this.setState({ sheet, noteDraft: this.cf().note });
+    } else if (sheet === 'location') {
+      this.setState({ sheet, locQuery: '' });
+    } else if (sheet === 'rollName') {
+      this.setState({ sheet, nameDraft: this.state.roll.name });
+    } else if (sheet === 'film' || sheet === 'camera') {
+      this.setState({ sheet, pickDraft: '' });
+    } else if (sheet === 'stamp') {
+      const f = this.cf();
+      this.setState({ sheet, stampDateDraft: f.date, stampTimeDraft: f.time });
+    } else {
+      this.setState({ sheet });
+    }
+  };
+  closeSheet = () => this.setState({ sheet: null });
+
+  componentDidUpdate() {
+    const f = this.state.sheet;
+    if (f && this.options[f] && this.wheelRef.current && this._scrolledFor !== f) {
+      this._scrolledFor = f;
+      this.wheelRef.current.scrollTop = this.state.wheelIndex * this.ROW;
+    }
+  }
+
+  confirmWheel = () => {
+    const sheet = this.state.sheet;
+    const opts = this.options[sheet] || [];
+    const el = this.wheelRef.current;
+    let idx = el ? Math.round(el.scrollTop / this.ROW) : this.state.wheelIndex;
+    idx = Math.max(0, Math.min(opts.length - 1, idx));
+    this.setFrameVal(this.fieldKey[sheet], opts[idx]);
+    this.closeSheet();
+  };
+
+  pickLight = (l) => this.setFrameVal('light', l);
+  pickLoc = (l) => { this.setFrameVal('location', l); this.closeSheet(); };
+  saveNote = () => { this.setFrameVal('note', this.state.noteDraft); this.closeSheet(); };
+  saveName = () => { this.setRoll('name', (this.state.nameDraft || '').trim() || this.state.roll.name); this.closeSheet(); };
+  pickFilm = (v) => { this.setRoll('film', v); this.closeSheet(); };
+  pickCamera = (v) => { this.setRoll('camera', v); this.closeSheet(); };
+  usePickDraft = () => {
+    const v = (this.state.pickDraft || '').trim();
+    if (!v) return;
+    if (this.state.sheet === 'film') this.setRoll('film', v);
+    else if (this.state.sheet === 'camera') this.setRoll('camera', v);
+    this.closeSheet();
+  };
+  saveStamp = () => {
+    this.setState(s => ({
+      frames: { ...s.frames, [s.cur]: { ...s.frames[s.cur], date: s.stampDateDraft, time: s.stampTimeDraft, stampAuto: false } },
+      sheet: null,
+    }));
+  };
+
+  onFile = (key) => (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => this.setFrameVal(key, reader.result);
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+  pickIntended = () => { if (this.intendedRef.current) this.intendedRef.current.click(); };
+  pickScan = () => { if (this.scanRef.current) this.scanRef.current.click(); };
+
+  onChipWheel = (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  };
+
+  toastMsg = (m) => {
+    this.setState({ toast: m });
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ toast: null }), 1700);
+  };
+
+  next = () => {
+    const s = this.state;
+    if (s.cur < s.maxFrame) { this.setState({ cur: s.cur + 1 }); return; }
+    if (s.maxFrame < s.roll.capacity) {
+      const lbl = String(s.cur).padStart(2, '0');
+      const carry = { ...s.frames[s.cur], note: '', intended: '', scan: '' };
+      this.setState({ frames: { ...s.frames, [s.maxFrame + 1]: carry }, cur: s.cur + 1, maxFrame: s.maxFrame + 1 });
+      this.toastMsg('Frame ' + lbl + ' logged — wound on');
+      return;
+    }
+    this.toastMsg('End of roll · ' + s.roll.capacity + ' frames');
+  };
+  prev = () => {
+    const s = this.state;
+    if (s.cur > 1) this.setState({ cur: s.cur - 1 });
+    else this.toastMsg('Start of roll');
+  };
+  goTo = (n) => this.setState({ cur: n });
+
+  _cx(e) { return (e.clientX != null) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0); }
+  beginDrag = (e) => { this._drag = true; this._x0 = this._cx(e); this._moved = 0; };
+  moveDrag = (e) => { if (!this._drag) return; const dx = this._cx(e) - this._x0; this._moved = dx; this.setState({ dragDX: Math.max(-70, Math.min(70, dx)) }); };
+  endDrag = () => { if (!this._drag) return; this._drag = false; const dx = this._moved; this.setState({ dragDX: 0 }); if (dx <= -46) this.next(); else if (dx >= 46) this.prev(); };
+  stopDrag = (e) => { e.stopPropagation(); };
+
+  renderVals() {
+    const s = this.state;
+    const f = this.cf();
+    const r = s.roll;
+    const mode = this.props.mode || 'mobile';
+    const variant = this.props.variant || 'A';
+    const isDesktop = mode === 'desktop';
+    const isMobile = !isDesktop;
+    const pal = this.palette(r.film);
+
+    const th = { paper:'#E8E1D3', paperDeep:'#E2DACB', rail:'#EBE5D7', card:'#F1ECE0', cardAlt:'#ECE6D8', chip:'#EDE7D9', panel:'#F2ECE0', field:'#FBF8F0' };
+    const heroShadow = '0 5px 16px rgba(0,0,0,0.20)';
+    const dialShadow = 'inset 0 0 0 1px rgba(0,0,0,0.45), 0 5px 14px rgba(0,0,0,0.24)';
+    const cardShadow = '0 1px 2px rgba(42,40,35,0.05)';
+
+    const chipBase = { padding:'9px 14px', borderRadius:'9px', background:th.chip, color:'#6E675B', border:'1px solid rgba(42,40,35,0.10)', fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'13px', fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', flex:'none' };
+    const chipSel = { ...chipBase, background:'#26241F', color:'#EFE9DB', border:'1px solid #26241F' };
+    const lightChips = this.lights.map(l => ({ label:l, onClick:() => this.pickLight(l), style: l === f.light ? chipSel : chipBase }));
+
+    const q = s.locQuery.toLowerCase();
+    const locRows = this.locResults.filter(l => l.toLowerCase().includes(q)).map(l => ({ label:l, onClick:() => this.pickLoc(l) }));
+
+    const ticks = Array.from({ length: r.capacity }).map((_, i) => {
+      const n = i + 1;
+      const cur = n === s.cur;
+      const shot = n <= s.maxFrame;
+      return { style: { flex:'1 1 0', minWidth:'0', height: cur ? '20px' : (shot ? '13px' : '8px'), borderRadius:'1px', background: cur ? pal.deep : (shot ? pal.accent : '#CFC6B4') } };
+    });
+
+    const rowBase = { display:'flex', alignItems:'center', gap:'11px', background:th.card, border:'1px solid rgba(42,40,35,0.08)', borderRadius:'10px', padding:'9px 11px', cursor:'pointer', width:'100%', appearance:'none' };
+    const rowSel = { ...rowBase, background:'#26241F', border:'1px solid #26241F' };
+    const framesList = [];
+    for (let n = s.maxFrame; n >= 1; n--) {
+      const fr = s.frames[n]; const sel = n === s.cur;
+      framesList.push({
+        n: String(n).padStart(2, '0'), ap: fr.ap, sh: fr.sh, light: fr.light,
+        sel, onClick: () => this.goTo(n),
+        style: sel ? rowSel : rowBase,
+        accent: pal.deep,
+        metaColor: sel ? '#EFE9DB' : '#2A2823',
+        lightColor: sel ? 'rgba(239,233,219,0.6)' : '#9A9280',
+      });
+    }
+
+    const sheet = s.sheet;
+    const isWheel = !!(sheet && this.options[sheet]);
+    const isPick = sheet === 'film' || sheet === 'camera';
+    let pickRows = [];
+    if (sheet === 'film') pickRows = this.filmOptions.map(v => ({ label:v, onClick:() => this.pickFilm(v), dot: v === r.film ? pal.deep : 'transparent', color: v === r.film ? '#2A2823' : '#5C564B', weight: v === r.film ? 700 : 500 }));
+    if (sheet === 'camera') pickRows = this.cameraOptions.map(v => ({ label:v, onClick:() => this.pickCamera(v), dot: v === r.camera ? pal.deep : 'transparent', color: v === r.camera ? '#2A2823' : '#5C564B', weight: v === r.camera ? 700 : 500 }));
+
+    const opts = isWheel ? this.options[sheet] : [];
+    const titles = { aperture:'Aperture', shutter:'Shutter speed', iso:'ISO', focus:'Focus distance', lens:'Lens', location:'Location', note:'Note', rollName:'Roll name', film:'Film stock', camera:'Camera body', stamp:'Date & time' };
+
+    const panelBase = { position:'absolute', zIndex:41, background:th.panel, boxSizing:'border-box', boxShadow:'0 -10px 40px rgba(0,0,0,0.18)' };
+    const panelStyle = isDesktop
+      ? { ...panelBase, top:0, right:0, bottom:0, width:'380px', borderRadius:'18px 0 0 18px', padding:'26px 24px', animation:'sheetIn 0.26s cubic-bezier(0.22,1,0.36,1) both', overflowY:'auto' }
+      : { ...panelBase, left:0, right:0, bottom:0, maxHeight:'86%', borderRadius:'22px 22px 0 0', padding:'20px 18px 26px', animation:'sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) both', overflowY:'auto' };
+    const toastStyle = { position:'absolute', left:'50%', bottom: isDesktop ? '96px' : '108px', transform:'translateX(-50%)', zIndex:60, background:'#26241F', color:'#EFE9DB', padding:'11px 18px', borderRadius:'11px', fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'13px', fontWeight:600, boxShadow:'0 10px 26px rgba(0,0,0,0.28)', animation:'toastIn 0.24s ease both', whiteSpace:'nowrap' };
+
+    return {
+      showA: isMobile && variant === 'A',
+      showB: isMobile && variant === 'B',
+      isDesktop,
+      stripBg: pal.strip, accent: pal.accent, accentDeep: pal.deep,
+      paper: th.paper, paperDeep: th.paperDeep, rail: th.rail, card: th.card, cardAlt: th.cardAlt, panel: th.panel, field: th.field,
+      heroShadow, dialShadow, cardShadow,
+      rollCode: r.code, rollName: r.name, film: r.film, camera: r.camera, format: r.format,
+      frameLabel: String(s.cur).padStart(2, '0'),
+      totalLabel: String(r.capacity),
+      progressPct: Math.round((s.maxFrame / r.capacity) * 100) + '%',
+      aperture: f.ap, shutter: f.sh, iso: f.iso, focus: f.focus, lens: f.lens, location: f.location,
+      isoTag: f.iso === r.box ? 'BOX' : 'MANUAL',
+      stampDate: this.fmtDate(f.date), stampTime: f.time, stampTag: f.stampAuto ? 'AUTO' : 'MANUAL',
+      hasIntended: !!f.intended, noIntended: !f.intended, intendedSrc: f.intended || '',
+      hasScan: !!f.scan, noScan: !f.scan, scanSrc: f.scan || '',
+      noteShown: f.note || 'Add a note…',
+      noteColor: f.note ? '#2A2823' : '#9A9280',
+      holes: Array.from({ length: 30 }),
+      ticks, lightChips, framesList,
+      headerShift: 'translateX(' + s.dragDX + 'px)',
+      onChipWheel: this.onChipWheel,
+
+      intendedRef: this.intendedRef, scanRef: this.scanRef,
+      onIntendedFile: this.onFile('intended'), onScanFile: this.onFile('scan'),
+      pickIntended: this.pickIntended, pickScan: this.pickScan,
+
+      sheetOpen: !!sheet,
+      sheetTitle: titles[sheet] || '',
+      isWheel, isPick,
+      isLocation: sheet === 'location',
+      isNote: sheet === 'note',
+      isText: sheet === 'rollName',
+      isStamp: sheet === 'stamp',
+      wheelRows: opts.map(o => ({ label:o })),
+      wheelRef: this.wheelRef,
+      pickRows, locRows,
+      pickDraft: s.pickDraft,
+      pickPlaceholder: sheet === 'film' ? 'Type a film stock…' : 'Type a camera…',
+      onPickInput: (e) => this.setState({ pickDraft: e.target.value }),
+      usePickDraft: this.usePickDraft,
+      locQuery: s.locQuery, noteDraft: s.noteDraft, nameDraft: s.nameDraft,
+      stampDateDraft: s.stampDateDraft, stampTimeDraft: s.stampTimeDraft,
+      onLocInput: (e) => this.setState({ locQuery: e.target.value }),
+      onNoteInput: (e) => this.setState({ noteDraft: e.target.value }),
+      onNameInput: (e) => this.setState({ nameDraft: e.target.value }),
+      onStampDate: (e) => this.setState({ stampDateDraft: e.target.value }),
+      onStampTime: (e) => this.setState({ stampTimeDraft: e.target.value }),
+      saveStamp: this.saveStamp,
+      panelStyle, toastStyle, toast: s.toast, hasToast: !!s.toast,
+
+      openAperture:() => this.openSheet('aperture'),
+      openShutter:() => this.openSheet('shutter'),
+      openIso:() => this.openSheet('iso'),
+      openFocus:() => this.openSheet('focus'),
+      openLens:() => this.openSheet('lens'),
+      openLocation:() => this.openSheet('location'),
+      openStamp:() => this.openSheet('stamp'),
+      openNote:() => this.openSheet('note'),
+      openRollName:() => this.openSheet('rollName'),
+      openFilm:() => this.openSheet('film'),
+      openCamera:() => this.openSheet('camera'),
+      closeSheet: this.closeSheet,
+      confirmWheel: this.confirmWheel,
+      saveNote: this.saveNote, saveName: this.saveName,
+      windNext: this.next, windPrev: this.prev,
+      beginDrag: this.beginDrag, moveDrag: this.moveDrag, endDrag: this.endDrag, stopDrag: this.stopDrag,
+    };
+  }
+}
+</script>
+</body>
+</html>

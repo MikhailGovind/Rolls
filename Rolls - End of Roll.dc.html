@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; padding: 0; background: #DAD3C4; }
+a { color: #2A2823; } a:hover { color: #5C4420; }
+</style>
+</helmet>
+
+<section style="padding:44px 48px 72px; font-family:'Hanken Grotesk',system-ui,sans-serif; color:#2A2823;">
+  <span style="display:block; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.14em; color:#8B8270; margin-bottom:6px;">EXPLORATION · END-OF-ROLL FLOW</span>
+  <span style="display:block; font-size:24px; font-weight:800; margin-bottom:6px;">What happens after frame 36?</span>
+  <span style="display:block; font-size:13px; color:#7A7264; margin-bottom:34px; max-width:640px;">Three directions for the moment a roll is finished. Screens are rough — pick a direction and I'll build it into the real app.</span>
+
+  <div style="display:flex; gap:34px; align-items:flex-start; flex-wrap:wrap;">
+
+    <!-- OPTION A -->
+    <div id="1a" style="flex:none; width:320px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;"><span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:8px; background:#26241F; color:#EFE9DB; font-size:12px; font-weight:800;">1a</span><span style="font-size:16px; font-weight:800;">Minimal — straight to Done</span></div>
+      <span style="display:block; font-size:12px; color:#7A7264; line-height:1.5; margin-bottom:14px;">Wind past the last frame → one sheet → roll is Done. No new states. Scans added per-frame later, same as now.</span>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); overflow:hidden;">
+          <div style="padding:14px 16px 10px; opacity:0.45;">
+            <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270;">CITY B&W · FRAME 36 / 36</span>
+            <div style="height:44px; border-radius:10px; background:#26241F; margin-top:8px;"></div>
+          </div>
+          <div style="background:#F2ECE0; border-radius:18px 18px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,0.12); padding:18px 18px 20px;">
+            <span style="display:block; font-family:'Instrument Serif',serif; font-size:22px; margin-bottom:2px;">That's the roll.</span>
+            <span style="display:block; font-size:12px; color:#7A7264; margin-bottom:14px;">36 of 36 frames logged · 12 Jun – 17 Jul</span>
+            <button style="appearance:none; border:none; width:100%; background:#26241F; color:#EFE9DB; border-radius:12px; padding:13px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; margin-bottom:8px;">Finish roll</button>
+            <button style="appearance:none; border:1px solid rgba(42,40,35,0.18); width:100%; background:transparent; color:#46423A; border-radius:12px; padding:12px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:600;">Keep open</button>
+          </div>
+        </div>
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">YOUR SHELF · AFTER</span>
+          <div style="display:flex; align-items:center; gap:11px; background:#EBE5D7; border-radius:12px; padding:11px 13px;">
+            <div style="flex:none; width:26px; height:34px; border-radius:5px; background:#F4EFE3; border:1px solid rgba(42,40,35,0.2); position:relative;"><div style="position:absolute; left:0; right:0; top:12px; height:8px; background:#3A3936;"></div></div>
+            <div style="flex:1; min-width:0;"><span style="display:block; font-size:13px; font-weight:700;">City B&W</span><span style="display:block; font-size:11px; color:#8B8270;">Ilford HP5 Plus · 36 frames</span></div>
+            <span style="flex:none; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:#9A9280;">DONE</span>
+          </div>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-top:10px; line-height:1.5;">＋ Simple, zero new concepts. － Loses the real-world story between shooting and scans.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION B -->
+    <div id="1b" style="flex:none; width:320px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;"><span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:8px; background:#26241F; color:#EFE9DB; font-size:12px; font-weight:800;">1b</span><span style="font-size:16px; font-weight:800;">Full lifecycle — Developing + bulk scans</span></div>
+      <span style="display:block; font-size:12px; color:#7A7264; line-height:1.5; margin-bottom:14px;">Finish → roll rewinds into a <strong>Developing</strong> state (at the lab). When scans arrive, a bulk session matches them to frames in order. Done comes with a summary.</span>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">FINISH SHEET</span>
+          <span style="display:block; font-family:'Instrument Serif',serif; font-size:22px; margin-bottom:2px;">Rewind the roll?</span>
+          <span style="display:block; font-size:12px; color:#7A7264; margin-bottom:14px;">It'll sit in Developing until your scans come back.</span>
+          <button style="appearance:none; border:none; width:100%; background:#26241F; color:#EFE9DB; border-radius:12px; padding:13px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700;">Rewind → Developing</button>
+        </div>
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">YOUR SHELF · NEW SECTION</span>
+          <span style="display:block; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#9A9280; margin-bottom:8px;">Developing · 1</span>
+          <div style="display:flex; align-items:center; gap:11px; background:#EBE5D7; border-radius:12px; padding:11px 13px; margin-bottom:8px;">
+            <div style="flex:none; width:26px; height:34px; border-radius:5px; background:#3A3936; border:1px solid rgba(42,40,35,0.3);"></div>
+            <div style="flex:1; min-width:0;"><span style="display:block; font-size:13px; font-weight:700;">City B&W</span><span style="display:block; font-size:11px; color:#8B8270;">Rewound 17 Jul · at the lab</span></div>
+            <span style="flex:none; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:#B07F37;">DEV</span>
+          </div>
+          <button style="appearance:none; border:1px solid rgba(42,40,35,0.18); width:100%; background:transparent; color:#46423A; border-radius:11px; padding:10px; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700;">Scans are back →</button>
+        </div>
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">BULK SCAN MATCH</span>
+          <span style="display:block; font-size:13px; font-weight:700; margin-bottom:2px;">Drop your 36 scans</span>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-bottom:10px;">They match to frames in shooting order — drag any that are off.</span>
+          <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:5px; margin-bottom:10px;">
+            <div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; background:#B3A88F;"></div><div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; background:#A79C84;"></div><div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; background:#B3A88F;"></div>
+            <div style="aspect-ratio:1; border-radius:5px; background:#B3A88F;"></div><div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; border:1.5px dashed rgba(42,40,35,0.3); display:flex; align-items:center; justify-content:center; font-size:12px; color:#8B8270;">＋</div><div style="aspect-ratio:1; border-radius:5px; border:1.5px dashed rgba(42,40,35,0.3);"></div><div style="aspect-ratio:1; border-radius:5px; border:1.5px dashed rgba(42,40,35,0.3);"></div><div style="aspect-ratio:1; border-radius:5px; border:1.5px dashed rgba(42,40,35,0.3);"></div>
+          </div>
+          <button style="appearance:none; border:none; width:100%; background:#26241F; color:#EFE9DB; border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700;">Match 8 scans to frames 01–08</button>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-top:10px; line-height:1.5;">＋ Honors the real film ritual; fastest scan entry. － Most new UI to learn and build.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTION C -->
+    <div id="1c" style="flex:none; width:320px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;"><span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:8px; background:#26241F; color:#EFE9DB; font-size:12px; font-weight:800;">1c</span><span style="font-size:16px; font-weight:800;">Middle — Developing, per-frame scans</span></div>
+      <span style="display:block; font-size:12px; color:#7A7264; line-height:1.5; margin-bottom:14px;">Keeps the <strong>Developing</strong> stage from 1b, but scans stay per-frame like today. One new state, no bulk matcher.</span>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">ROLL PAGE · DEVELOPING</span>
+          <div style="display:flex; align-items:center; gap:9px; margin-bottom:12px;"><span style="flex:none; width:9px; height:9px; border-radius:50%; background:#B07F37; box-shadow:0 0 7px rgba(176,127,55,0.7);"></span><span style="font-size:13px; font-weight:700;">City B&W is developing</span></div>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-bottom:12px;">Logging is locked. Open any frame to add its scan when they're back.</span>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:9px; background:#F2ECE0; border-radius:9px; padding:8px 11px;"><span style="font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">01</span><span style="font-size:11px; color:#46423A;">f/5.6 · 1/250</span><span style="margin-left:auto; font-size:10px; font-weight:700; color:#B07F37;">＋ scan</span></div>
+            <div style="display:flex; align-items:center; gap:9px; background:#F2ECE0; border-radius:9px; padding:8px 11px;"><span style="font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">02</span><span style="font-size:11px; color:#46423A;">f/8 · 1/500</span><span style="margin-left:auto; font-size:10px; font-weight:700; color:#5C8A54;">✓ scanned</span></div>
+            <div style="display:flex; align-items:center; gap:9px; background:#F2ECE0; border-radius:9px; padding:8px 11px;"><span style="font-family:'DM Mono',monospace; font-size:11px; color:#8B8270;">03</span><span style="font-size:11px; color:#46423A;">f/5.6 · 1/250</span><span style="margin-left:auto; font-size:10px; font-weight:700; color:#B07F37;">＋ scan</span></div>
+          </div>
+          <button style="appearance:none; border:none; width:100%; background:#26241F; color:#EFE9DB; border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700;">Mark as Done</button>
+        </div>
+        <div style="border-radius:20px; background:#E8E1D3; border:1px solid rgba(42,40,35,0.16); padding:16px;">
+          <span style="display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.12em; color:#8B8270; margin-bottom:10px;">DONE · ROLL SUMMARY</span>
+          <span style="display:block; font-family:'Instrument Serif',serif; font-size:20px; margin-bottom:2px;">City B&W</span>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-bottom:10px;">36 frames · 12 Jun – 17 Jul · London & Brighton · Ilford HP5 Plus</span>
+          <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:5px;">
+            <div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; background:#B3A88F;"></div><div style="aspect-ratio:1; border-radius:5px; background:#A79C84;"></div><div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div><div style="aspect-ratio:1; border-radius:5px; background:#B3A88F;"></div><div style="aspect-ratio:1; border-radius:5px; background:#C9BFA9;"></div>
+          </div>
+          <span style="display:block; font-size:11px; color:#7A7264; margin-top:10px; line-height:1.5;">＋ Real-world story with little new UI. － Adding 36 scans one-by-one is slow.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<style>
+@keyframes starTwinkle { 0%,100% { opacity: 0.25; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes sparkleStar { 0%,100% { opacity: 0.15; transform: translate(-50%,-50%) scale(0.55) rotate(0deg); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(8deg); } }
+@keyframes cometA { 0%, 93% { opacity: 0; transform: translate(0,0) rotate(-32deg); } 94% { opacity: 1; } 97.5% { opacity: 0; transform: translate(-400px, 250px) rotate(-32deg); } 100% { opacity: 0; transform: translate(-400px, 250px) rotate(-32deg); } }
+@keyframes cometB { 0%, 95.5% { opacity: 0; transform: translate(0,0) rotate(18deg); } 96.3% { opacity: 0.9; } 99% { opacity: 0; transform: translate(340px, 110px) rotate(18deg); } 100% { opacity: 0; transform: translate(340px, 110px) rotate(18deg); } }
+@keyframes warpBurst { 0% { transform: scale(0.3) rotate(0deg); opacity: 0; } 18% { opacity: 0.9; } 100% { transform: scale(2.15) rotate(26deg); opacity: 0; } }
+@keyframes warpFlash { 0% { opacity: 0; } 22% { opacity: 0.5; } 100% { opacity: 0; } }
+@keyframes meteorOne { 0%, 90.5% { opacity: 0; transform: translate(0,0) rotate(-36deg); } 91.1% { opacity: 0.95; } 93.4% { opacity: 0; transform: translate(-300px, 218px) rotate(-36deg); } 100% { opacity: 0; transform: translate(-300px, 218px) rotate(-36deg); } }
+@keyframes asteroidDrift { 0% { opacity: 0; transform: translate(0,0) rotate(0deg); } 1.5% { opacity: 0.5; } 46% { opacity: 0.5; } 49% { opacity: 0; transform: translate(390px, 74px) rotate(300deg); } 100% { opacity: 0; transform: translate(390px, 74px) rotate(300deg); } }
+@keyframes galaxyBreathe { 0%, 100% { opacity: 0.22; transform: rotate(-24deg) scale(0.94); } 50% { opacity: 0.5; transform: rotate(-20deg) scale(1.05); } }
+@keyframes nebulaDrift { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-24px, 14px); } }
+@keyframes minispin { from { background-position: 0 0; } to { background-position: 96px 0; } }
+@keyframes calSwing { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(6deg); } }
+.rolls-map .leaflet-container { background: #EBE8E1; font-family: 'Hanken Grotesk', sans-serif; }
+.rolls-map .leaflet-tile { outline: 1px solid transparent; }
+.rolls-map .leaflet-marker-icon { background: transparent; border: none; }
+.rolls-photo-pin { position: relative; cursor: pointer; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.35)); }
+.rolls-photo-pin .pp-card { width: 54px; height: 54px; border-radius: 12px; border: 3px solid #ffffff; box-sizing: border-box; }
+.rolls-photo-pin .pp-tail { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid #ffffff; }
+.rolls-photo-pin .pp-count { position: absolute; left: 5px; bottom: 5px; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+</style>
+<style>
+.rolls-app * { scrollbar-width: none; -ms-overflow-style: none; }
+.rolls-app *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes bgdriftA { from { background-position: 0 0; } to { background-position: -440px 0; } }
+@keyframes bgdriftB { from { background-position: 0 0; } to { background-position: 660px 220px; } }
+@keyframes twk { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+@keyframes globespin { from { background-position: 0 0, 0 0; } to { background-position: -600px 0, -360px 0; } }
+@keyframes pulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; } 50% { transform: translate(-50%,-50%) scale(1.5); opacity: 1; } }
+@keyframes rollOut { 0% { width: 14px; } 65% { width: 196px; } 82% { width: 186px; } 100% { width: 190px; } }
+@keyframes rollRecoil { 0% { transform: translateX(0); } 35% { transform: translateX(-3px); } 100% { transform: translateX(0); } }
+@keyframes rollPop { 0% { transform: translateY(-50%) scale(0.5); opacity: 0; } 100% { transform: translateY(-50%) scale(1); opacity: 1; } }
+@keyframes sideSlideOut { from { transform: translateX(0); } to { transform: translateX(-257px); } }
+@keyframes ring { 0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0.7; } 100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; } }
+@keyframes dotpulse { 0%,100% { box-shadow:0 0 4px 1px currentColor; opacity:0.85; } 50% { box-shadow:0 0 10px 3px currentColor; opacity:1; } }
+@keyframes dotcycle { 0% { opacity:0; } 7% { opacity:1; } 43% { opacity:1; } 50% { opacity:0; } 100% { opacity:0; } }
+.rolls-scroll::-webkit-scrollbar { width: 0; height: 0; }
+.rolls-scroll { scrollbar-width: none; }
+</style>
+</helmet>
+
+<div ref="{{ themeRootRef }}" class="rolls-app" style="position:relative; height:100%; width:100%; overflow:hidden; background:var(--t-paper,#E8E1D3); font-family:'Hanken Grotesk', system-ui, sans-serif; color:var(--t-ink,#2A2823); -webkit-font-smoothing:antialiased;">
+
+  <!-- ===== SWIPE TRACK : Home | Cosmos ===== -->
+  <div onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerCancel="{{ onUp }}" style="display:flex; width:200%; height:100%; transform:{{ trackTransform }}; transition:{{ trackTransition }}; touch-action:pan-y;">
+
+    <!-- ============ HOME PANEL ============ -->
+    <div style="width:50%; flex:none; height:100%; position:relative; min-width:0;">
+
+      <!-- DESKTOP HOME -->
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; display:flex; background:var(--t-paperDeep,#E2DACB); min-width:0; overflow:hidden;">
+        <div style="{{ sideOuter }}">
+        <div style="{{ sideInner }}">
+          <div style="flex:none; padding:26px 22px 14px; display:flex; align-items:flex-end; justify-content:space-between;">
+            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:var(--t-muted,#9A9280);">FILM LOG</span><span style="font-family:'DM Mono',monospace; font-size:25px; font-weight:500; color:var(--t-ink,#2A2823); letter-spacing:-0.01em; line-height:1;">Your Shelf</span></div>
+            <span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--t-muted,#9A9280);">{{ rollCount }}</span>
+          </div>
+          <div style="flex:none; display:flex; padding:9px 18px; background:rgba(var(--t-brgb,42,40,35),0.04); border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.08);"><button onClick="{{ sortRoll }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:1; text-align:left; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">Roll{{ rollArrow }}</button><button onClick="{{ sortLoaded }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:none; width:58px; text-align:right; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">Loaded{{ loadedArrow }}</button><span style="flex:none; width:52px; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280); text-align:right;">Frames</span><button onClick="{{ sortState }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:none; width:52px; text-align:right; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">State{{ stateArrow }}</button></div>
+          <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto;">
+            <sc-for list="{{ ledgerRows }}" as="row" hint-placeholder-count="6"><div style="position:relative; overflow:hidden; border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.07);"><button onClick="{{ row.onDelete }}" style="appearance:none; cursor:pointer; position:absolute; left:0; top:0; bottom:0; width:86px; border:none; background:#B03A2E; color:#FBF4E8; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; visibility:{{ row.delVis }};">Delete</button><button onClick="{{ row.onOpen }}" onPointerDown="{{ row.onPD }}" onPointerMove="{{ row.onPM }}" onPointerUp="{{ row.onPU }}" onPointerCancel="{{ row.onPU }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; padding:13px 18px; border:none; background:{{ row.bg }}; transform:{{ row.rowShift }}; transition:transform 0.22s cubic-bezier(0.22,1,0.36,1); touch-action:pan-y;"><span style="flex:none; width:18px; height:23px; position:relative; margin-right:13px;"><span style="position:absolute; left:6px; top:0; width:7px; height:3px; border-radius:2px 2px 0 0; background:var(--t-muted2,#8B8270);"></span><span style="position:absolute; left:1px; top:3px; right:1px; bottom:0; border:1.5px solid var(--t-ink,#2A2823); border-radius:4px; background:{{ row.iconBody }};"></span><span style="position:absolute; left:1px; top:13px; right:1px; height:4px; background:{{ row.iconBand }};"></span></span><span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:{{ row.nameCol }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.name }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; color:{{ row.subCol }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.film }} · {{ row.cameraShort }}</span></span><span style="flex:none; width:58px; font-family:'DM Mono',monospace; font-size:10.5px; color:{{ row.loadedCol }}; text-align:right;">{{ row.loaded }}</span><span style="flex:none; width:52px; font-family:'DM Mono',monospace; font-size:13px; color:{{ row.frameCol }}; text-align:right;">{{ row.shot }}/{{ row.total }}</span><span style="flex:none; width:52px; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; color:{{ row.stateColor }}; text-align:right;">{{ row.state }}</span></button></div></sc-for>
+            <sc-if value="{{ hasRolls }}" hint-placeholder-val="{{ true }}"><div style="display:flex; justify-content:space-between; padding:15px 18px; font-family:'DM Mono',monospace; font-size:11px; color:var(--t-muted,#9A9280);"><span>{{ rollCount }} rolls · {{ totalFrames }} frames</span><span>{{ activeCount }} active</span></div></sc-if>
+            <sc-if value="{{ noRolls }}" hint-placeholder-val="{{ false }}"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:64px 30px; text-align:center;"><span style="flex:none; width:52px; height:66px; position:relative; opacity:0.85;"><span style="position:absolute; left:18px; top:0; width:20px; height:6px; border-radius:3px 3px 0 0; background:var(--t-muted2,#8B8270);"></span><span style="position:absolute; left:4px; top:6px; right:4px; bottom:0; border:2px solid var(--t-ink,#2A2823); border-radius:7px; background:var(--t-card2,#F4EFE3);"></span><span style="position:absolute; left:6px; top:32px; right:6px; height:11px; background:var(--t-muted,#9A9280);"></span></span><div style="display:flex; flex-direction:column; gap:5px; align-items:center;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:18px; font-weight:800; color:var(--t-ink,#2A2823);">Your shelf is empty</span><span style="font-family:'Hanken Grotesk'; font-size:13px; line-height:1.5; color:var(--t-muted3,#7A7264); max-width:230px;">Load your first roll to start logging frames as you shoot.</span></div></div></sc-if>
+          </div>
+          <div style="flex:none; padding:12px 16px; border-top:1px solid rgba(var(--t-brgb,42,40,35),0.10);">
+            <button onClick="{{ openProfile }}" style="appearance:none; cursor:pointer; width:100%; display:flex; align-items:center; gap:11px; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.08); border-radius:11px; padding:8px 10px;"><span style="{{ avatarXs }}">{{ avatarXsInitials }}</span><span style="display:flex; flex-direction:column; gap:1px; text-align:left;"><span style="font-family:'Hanken Grotesk'; font-size:13px; font-weight:600; color:var(--t-ink,#2A2823);">{{ profileLabel }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--t-muted,#9A9280);">Settings</span></span></button>
+          </div>
+        </div>
+        </div>
+
+        <div style="flex:1; min-width:0; height:100%; position:relative;">
+          <sc-if value="{{ noSelection }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goCosmos }}" style="appearance:none; cursor:pointer; position:absolute; top:18px; right:22px; z-index:9; background:transparent; border:none; padding:4px 0; display:flex; align-items:center; gap:5px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:600; color:var(--t-muted3,#7A7264);">Cosmos <span style="font-size:15px; line-height:1;">›</span></button></sc-if>
+          <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+          <dc-import name="Frame Logging Screen" mode="desktop" embedded="true" on-status-change="{{ onRollStatus }}" theme="{{ themeName }}" appearance="{{ appearance }}" roll-key="{{ selKey }}" scans="{{ selScans }}" frames="{{ selFrames }}" live="{{ isLive }}" on-frames-change="{{ selFramesChange }}" frame0="{{ selFrame }}" roll-name="{{ selName }}" film="{{ selFilm }}" camera="{{ selCamera }}" fmt="{{ selFormat }}" capacity="{{ selTotal }}" shot="{{ selShot }}" on-back="{{ deselectRoll }}" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+          </sc-if>
+          <sc-if value="{{ noSelection }}" hint-placeholder-val="{{ true }}">
+          <div style="height:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:40px; text-align:center;">
+            <div style="flex:none; width:58px; height:72px; position:relative; opacity:0.9;"><div style="position:absolute; left:16px; top:0; width:26px; height:7px; border-radius:3px 3px 0 0; background:#A79D8C;"></div><div style="position:absolute; left:4px; top:7px; right:4px; bottom:0; border:2px solid #B3A993; border-radius:8px; background:var(--t-rail,#EBE5D7);"></div><div style="position:absolute; left:4px; top:38px; right:4px; height:12px; background:#C79A55; opacity:0.5;"></div></div>
+            <div style="display:flex; flex-direction:column; gap:7px; max-width:340px;">
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:24px; font-weight:700; color:var(--t-ink,#2A2823);">Pick a roll to start logging</span>
+              <span style="font-family:'Hanken Grotesk'; font-size:14px; line-height:1.5; color:var(--t-muted3,#7A7264);">Choose a roll from your shelf on the left to open its frames — or load a new roll into the camera.</span>
+            </div>
+            <button onClick="{{ openNewRoll }}" style="appearance:none; cursor:pointer; display:flex; align-items:center; gap:8px; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:11px; padding:13px 22px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.22);"><span style="font-size:17px; line-height:1;">＋</span> Load a new roll</button>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- MOBILE HOME : VARIANT A — Film-strip shelf -->
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div style="height:100%; display:flex; flex-direction:column; min-width:0;">
+        <div style="flex:none; padding:50px 18px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px;"><div style="flex:none; width:22px; height:28px; position:relative;"><div style="position:absolute; left:6px; top:0; width:10px; height:3px; border-radius:2px 2px 0 0; background:var(--t-muted2,#8B8270);"></div><div style="position:absolute; left:1px; top:3px; right:1px; bottom:0; border:1.5px solid var(--t-ink,#2A2823); border-radius:4px; background:var(--t-card,#F1ECE0);"></div><div style="position:absolute; left:1px; top:15px; right:1px; height:5px; background:#C79A55;"></div></div><span style="font-family:'Hanken Grotesk',sans-serif; font-size:25px; font-weight:600; color:var(--t-ink,#2A2823);">Rolls</span></div>
+          <button onClick="{{ openProfile }}" style="appearance:none; cursor:pointer; width:38px; height:38px; border-radius:50%; background:#C79A55; color:#2A2218; border:none; font-family:'Hanken Grotesk'; font-weight:700; font-size:13px;">AM</button>
+        </div>
+        <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto; padding:6px 18px 26px;">
+          <button onClick="{{ openNewRoll }}" style="appearance:none; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:15px; padding:16px; font-family:'Hanken Grotesk'; font-size:15px; font-weight:700; box-shadow:0 8px 20px rgba(38,36,31,0.24); margin-bottom:22px;"><span style="font-size:19px; line-height:1;">＋</span> Load a new roll</button>
+
+          <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:11px;">In the camera</span>
+          <div style="display:flex; flex-direction:column; gap:13px; margin-bottom:26px;"><sc-for list="{{ activeRolls }}" as="roll" hint-placeholder-count="2"><button onClick="{{ roll.onOpen }}" style="appearance:none; cursor:pointer; text-align:left; width:100%; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.10); border-radius:16px; padding:0; overflow:hidden; box-shadow:0 2px 8px rgba(var(--t-brgb,42,40,35),0.06);"><div style="background:{{ roll.strip }}; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; flex-direction:column; gap:3px; min-width:0;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:600; color:#EFE9DB;">{{ roll.name }}</span><span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.04em; color:{{ roll.accent }};">{{ roll.film }} · {{ roll.cameraShort }}</span></div><span style="font-family:'DM Mono',monospace; font-size:22px; color:#EFE9DB; align-self:flex-end;">{{ roll.shotPad }}</span></div><div style="display:flex; gap:3px; padding:13px 16px 9px; background:var(--t-card,#F1ECE0);"><sc-for list="{{ roll.cells }}" as="c" hint-placeholder-count="16"><div style="{{ c.style }}"></div></sc-for></div><div style="display:flex; align-items:center; justify-content:space-between; padding:0 16px 14px;"><span style="font-family:'DM Mono',monospace; font-size:12px; color:#5C564B;">{{ roll.shot }} / {{ roll.total }} · {{ roll.format }}</span><span style="font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; color:{{ roll.accentDeep }};">{{ roll.remain }} frames left</span></div></button></sc-for></div>
+
+          <sc-if value="{{ hasDev }}" hint-placeholder-val="{{ false }}">
+          <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:11px;">Developing</span>
+          <div style="display:flex; flex-direction:column; gap:9px; margin-bottom:26px;"><sc-for list="{{ devRolls }}" as="roll" hint-placeholder-count="1"><button onClick="{{ roll.onScans }}" style="appearance:none; cursor:pointer; text-align:left; width:100%; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.08); border-radius:13px; padding:12px 14px; display:flex; align-items:center; gap:13px;"><div style="flex:none; width:26px; height:34px; border-radius:5px; background:#3A3936; border:1px solid rgba(var(--t-brgb,42,40,35),0.3);"></div><div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:16px; font-weight:600; color:var(--t-ink,#2A2823);">{{ roll.name }}</span><span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--t-muted2,#8B8270); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Rewound {{ roll.date }} · at the lab</span></div><span style="flex:none; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; color:#B07F37;">Scans are back →</span></button></sc-for></div>
+          </sc-if>
+
+          <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:11px;">Developed</span>
+          <div style="display:flex; flex-direction:column; gap:9px;"><sc-for list="{{ doneRolls }}" as="roll" hint-placeholder-count="4"><button onClick="{{ roll.onOpen }}" style="appearance:none; cursor:pointer; text-align:left; width:100%; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.08); border-radius:13px; padding:12px 14px; display:flex; align-items:center; gap:13px;"><div style="flex:none; display:flex; flex-direction:column; gap:4px;"><div style="display:flex; gap:2px;"><sc-for list="{{ roll.cells }}" as="c" hint-placeholder-count="8"><div style="{{ c.style }}"></div></sc-for></div></div><div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:16px; font-weight:600; color:var(--t-ink,#2A2823);">{{ roll.name }}</span><span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--t-muted2,#8B8270); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ roll.film }} · {{ roll.cameraShort }}</span></div><div style="flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:3px;"><span style="font-family:'DM Mono',monospace; font-size:12px; color:#5C564B;">{{ roll.shot }}/{{ roll.total }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; color:#A79D8C;">{{ roll.date }}</span></div></button></sc-for></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- MOBILE HOME : VARIANT B — Canister rack -->
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%; display:flex; flex-direction:column; min-width:0;">
+        <div style="flex:none; padding:50px 18px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-family:'Hanken Grotesk',sans-serif; font-size:25px; font-weight:600; color:var(--t-ink,#2A2823);">Shelf</span>
+          <button onClick="{{ openProfile }}" style="appearance:none; cursor:pointer; width:38px; height:38px; border-radius:50%; background:#C79A55; color:#2A2218; border:none; font-family:'Hanken Grotesk'; font-weight:700; font-size:13px;">AM</button>
+        </div>
+        <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto; padding:6px 0 26px;">
+          <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin:0 18px 12px;">Loaded &amp; developed</span>
+          <div class="rolls-scroll" style="display:flex; gap:13px; overflow-x:auto; padding:4px 18px 16px; touch-action:pan-x;">
+            <button onClick="{{ openNewRoll }}" style="appearance:none; cursor:pointer; flex:none; width:96px; height:230px; border-radius:16px; border:2px dashed rgba(var(--t-brgb,42,40,35),0.28); background:rgba(var(--t-brgb,42,40,35),0.03); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;"><span style="font-size:26px; color:var(--t-muted,#9A9280); line-height:1;">＋</span><span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:600; color:var(--t-muted2,#8B8270); text-align:center; line-height:1.3;">New<br>roll</span></button>
+            <sc-for list="{{ canisters }}" as="can" hint-placeholder-count="5"><button onClick="{{ can.onOpen }}" style="appearance:none; cursor:pointer; flex:none; width:108px; height:230px; border-radius:16px; border:none; padding:0; position:relative; overflow:hidden; background:{{ can.body }}; box-shadow:0 6px 16px rgba(0,0,0,0.18);"><div style="position:absolute; top:0; left:0; right:0; height:30px; background:rgba(0,0,0,0.22);"></div><div style="position:absolute; top:11px; left:50%; transform:translateX(-50%); width:26px; height:9px; border-radius:3px; background:rgba(255,255,255,0.35);"></div><div style="position:absolute; top:42px; left:9px; right:9px; bottom:54px; border-radius:8px; background:{{ can.label }}; display:flex; flex-direction:column; padding:10px 9px;"><span style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; color:{{ can.brandColor }};">{{ can.brand }}</span><span style="font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; color:#1d1b17; line-height:1.1; margin-top:3px;">{{ can.name }}</span><span style="margin-top:auto; font-family:'DM Mono',monospace; font-size:9px; color:#3a362e;">{{ can.iso }}</span></div><div style="position:absolute; bottom:11px; left:9px; right:9px; display:flex; flex-direction:column; gap:5px;"><div style="height:4px; border-radius:2px; background:rgba(255,255,255,0.22); overflow:hidden;"><div style="height:100%; width:{{ can.pct }}; background:{{ can.accent }};"></div></div><span style="font-family:'DM Mono',monospace; font-size:9px; color:rgba(255,255,255,0.8);">{{ can.statusLabel }}</span></div></button></sc-for>
+          </div>
+          <div style="padding:8px 18px 0;">
+            <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:11px;">Latest frames</span>
+            <div class="rolls-scroll" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; touch-action:pan-x;"><sc-for list="{{ latestFrames }}" as="fr" hint-placeholder-count="10"><div style="{{ fr.style }}"></div></sc-for></div>
+            <div style="margin-top:18px; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.08); border-radius:14px; padding:15px 16px;">
+              <span style="font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280);">This week</span>
+              <p style="margin:7px 0 0; font-family:'Hanken Grotesk',sans-serif; font-size:15px; line-height:1.5; color:var(--t-ink2,#46423a);">{{ activeCount }} rolls in the camera, {{ weekFrames }} frames shot. Brick Lane and Columbia Road are your busiest stops.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- MOBILE HOME : VARIANT C — Logbook index -->
+      <sc-if value="{{ showC }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%; display:flex; flex-direction:column; min-width:0; background:var(--t-paper2,#E5DECF);">
+        <div style="flex:none; padding:50px 18px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.12);">
+          <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.16em; color:var(--t-muted,#9A9280);">FILM LOG</span><span style="font-family:'DM Mono',monospace; font-size:20px; font-weight:500; color:var(--t-ink,#2A2823); letter-spacing:-0.01em;">Your Shelf</span></div>
+          <button onClick="{{ openProfile }}" style="appearance:none; cursor:pointer; width:36px; height:36px; border-radius:50%; background:#C79A55; color:#2A2218; border:none; font-family:'Hanken Grotesk'; font-weight:700; font-size:12px;">AM</button>
+        </div>
+        <div style="flex:none; display:flex; padding:9px 18px; background:rgba(var(--t-brgb,42,40,35),0.04); border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.08);"><button onClick="{{ sortRoll }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:1; text-align:left; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">Roll{{ rollArrow }}</button><button onClick="{{ sortLoaded }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:none; width:58px; text-align:right; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">Loaded{{ loadedArrow }}</button><span style="flex:none; width:52px; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280); text-align:right;">Frames</span><button onClick="{{ sortState }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; flex:none; width:52px; text-align:right; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--t-muted,#9A9280);">State{{ stateArrow }}</button></div>
+        <div class="rolls-scroll" style="flex:1; min-height:0; overflow-y:auto;">
+          <sc-for list="{{ ledgerRows }}" as="row" hint-placeholder-count="6"><div style="position:relative; overflow:hidden; border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.07);"><button onClick="{{ row.onDelete }}" style="appearance:none; cursor:pointer; position:absolute; left:0; top:0; bottom:0; width:86px; border:none; background:#B03A2E; color:#FBF4E8; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; visibility:{{ row.delVis }};">Delete</button><button onClick="{{ row.onOpen }}" onPointerDown="{{ row.onPD }}" onPointerMove="{{ row.onPM }}" onPointerUp="{{ row.onPU }}" onPointerCancel="{{ row.onPU }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; padding:13px 18px; border:none; background:{{ row.bg }}; transform:{{ row.rowShift }}; transition:transform 0.22s cubic-bezier(0.22,1,0.36,1); touch-action:pan-y;"><span style="flex:none; width:18px; height:23px; position:relative; margin-right:13px;"><span style="position:absolute; left:6px; top:0; width:7px; height:3px; border-radius:2px 2px 0 0; background:var(--t-muted2,#8B8270);"></span><span style="position:absolute; left:1px; top:3px; right:1px; bottom:0; border:1.5px solid var(--t-ink,#2A2823); border-radius:4px; background:{{ row.iconBody }};"></span><span style="position:absolute; left:1px; top:13px; right:1px; height:4px; background:{{ row.iconBand }};"></span></span><span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:var(--t-ink,#2A2823); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.name }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--t-muted2,#8B8270); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.film }} · {{ row.cameraShort }}</span></span><span style="flex:none; width:58px; font-family:'DM Mono',monospace; font-size:10.5px; color:var(--t-muted2,#8B8270); text-align:right;">{{ row.loaded }}</span><span style="flex:none; width:52px; font-family:'DM Mono',monospace; font-size:13px; color:var(--t-ink2,#46423a); text-align:right;">{{ row.shot }}/{{ row.total }}</span><span style="flex:none; width:52px; font-family:'Hanken Grotesk'; font-size:11px; font-weight:700; color:{{ row.stateColor }}; text-align:right;">{{ row.state }}</span></button></div></sc-for>
+          <sc-if value="{{ hasRolls }}" hint-placeholder-val="{{ true }}"><div style="display:flex; justify-content:space-between; padding:15px 18px; font-family:'DM Mono',monospace; font-size:11px; color:var(--t-muted,#9A9280);"><span>{{ rollCount }} rolls · {{ totalFrames }} frames</span><span>{{ activeCount }} active</span></div></sc-if>
+          <sc-if value="{{ noRolls }}" hint-placeholder-val="{{ false }}"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:64px 30px; text-align:center;"><span style="flex:none; width:52px; height:66px; position:relative; opacity:0.85;"><span style="position:absolute; left:18px; top:0; width:20px; height:6px; border-radius:3px 3px 0 0; background:var(--t-muted2,#8B8270);"></span><span style="position:absolute; left:4px; top:6px; right:4px; bottom:0; border:2px solid var(--t-ink,#2A2823); border-radius:7px; background:var(--t-card2,#F4EFE3);"></span><span style="position:absolute; left:6px; top:32px; right:6px; height:11px; background:var(--t-muted,#9A9280);"></span></span><div style="display:flex; flex-direction:column; gap:5px; align-items:center;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:18px; font-weight:800; color:var(--t-ink,#2A2823);">Your shelf is empty</span><span style="font-family:'Hanken Grotesk'; font-size:13px; line-height:1.5; color:var(--t-muted3,#7A7264); max-width:230px;">Load your first roll to start logging frames as you shoot.</span></div></div></sc-if>
+        </div>
+        <div style="flex:none; padding:12px 18px calc(18px + env(safe-area-inset-bottom)); border-top:1px solid rgba(var(--t-brgb,42,40,35),0.12); background:var(--t-paper2,#E5DECF);"><button onClick="{{ openNewRoll }}" style="appearance:none; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:9px; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:14px; padding:15px; font-family:'Hanken Grotesk'; font-size:15px; font-weight:700; box-shadow:0 8px 20px rgba(38,36,31,0.24);"><span style="font-size:18px; line-height:1;">＋</span> Load a new roll</button></div>
+      </div>
+      </sc-if>
+
+    </div>
+
+    <!-- ============ COSMOS PANEL ============ -->
+    <div style="width:50%; flex:none; height:100%; position:relative; overflow:hidden; background:#04060c;">
+      <!-- night starfield : deep space blues, sharp sparkly stars -->
+      <div style="position:absolute; inset:0; background:radial-gradient(130% 100% at 70% 6%, #131b36 0%, #0b1024 42%, #05070f 100%);"></div>
+      <div style="position:absolute; inset:0; background:radial-gradient(70% 50% at 22% 80%, rgba(88,70,160,0.18), transparent 68%), radial-gradient(60% 45% at 80% 30%, rgba(64,140,152,0.14), transparent 70%);"></div>
+      <!-- milky-way band + nebulae -->
+      <div style="position:absolute; inset:-12%; animation:nebulaDrift 60s ease-in-out infinite; background:linear-gradient(118deg, transparent 22%, rgba(96,84,190,0.22) 38%, rgba(70,120,205,0.28) 47%, rgba(178,112,200,0.18) 54%, rgba(64,150,170,0.16) 62%, transparent 78%);"></div>
+      <div style="position:absolute; inset:-12%; animation:nebulaDrift 84s ease-in-out infinite reverse; background:linear-gradient(118deg, transparent 34%, rgba(30,22,60,0.34) 46%, rgba(52,32,58,0.26) 52%, rgba(24,26,64,0.30) 58%, transparent 70%);"></div>
+      <div style="position:absolute; inset:-14%; background-image:radial-gradient(1px 1px at 12px 8px,rgba(255,255,255,0.85) 50%,transparent 62%),radial-gradient(0.9px 0.9px at 34px 26px,rgba(226,236,255,0.75) 50%,transparent 62%),radial-gradient(0.8px 0.8px at 8px 40px,rgba(255,238,214,0.7) 50%,transparent 62%),radial-gradient(0.9px 0.9px at 46px 12px,rgba(255,255,255,0.8) 50%,transparent 62%),radial-gradient(0.8px 0.8px at 24px 48px,rgba(214,228,255,0.7) 50%,transparent 62%); background-repeat:repeat; background-size:56px 56px; -webkit-mask-image:linear-gradient(118deg, transparent 26%, #000 44%, #000 58%, transparent 76%); mask-image:linear-gradient(118deg, transparent 26%, #000 44%, #000 58%, transparent 76%); opacity:0.8;"></div>
+      <div style="position:absolute; left:52%; top:26%; width:64%; height:46%; transform:translate(-50%,-50%) rotate(-16deg); border-radius:50%; filter:blur(26px); background:radial-gradient(55% 42% at 50% 50%, rgba(110,130,235,0.26), rgba(150,95,210,0.15) 55%, transparent 75%);"></div>
+      <div style="position:absolute; left:64%; top:38%; width:30%; height:20%; transform:translate(-50%,-50%) rotate(-14deg); border-radius:50%; filter:blur(18px); background:radial-gradient(55% 45% at 50% 50%, rgba(220,150,140,0.14), rgba(190,110,170,0.08) 60%, transparent 78%);"></div>
+      <div style="position:absolute; left:36%; top:52%; width:40%; height:26%; transform:translate(-50%,-50%) rotate(20deg); border-radius:50%; filter:blur(22px); background:radial-gradient(55% 45% at 50% 50%, rgba(72,110,225,0.18), rgba(120,80,200,0.10) 58%, transparent 78%);"></div>
+      <div style="position:absolute; left:18%; top:72%; width:46%; height:34%; transform:translate(-50%,-50%) rotate(22deg); border-radius:50%; filter:blur(24px); background:radial-gradient(55% 45% at 50% 50%, rgba(84,190,196,0.12), rgba(90,110,220,0.07) 58%, transparent 78%);"></div>
+      <div style="position:absolute; left:78%; top:58%; width:34%; height:26%; transform:translate(-50%,-50%) rotate(-30deg); border-radius:50%; filter:blur(22px); background:radial-gradient(55% 45% at 50% 50%, rgba(196,120,205,0.10), transparent 72%);"></div>
+      <!-- colored bright stars -->
+      <div style="position:absolute; top:44%; left:12%; width:2.5px; height:2.5px; border-radius:50%; background:#9fc0ff; box-shadow:0 0 7px 2px rgba(130,170,255,0.85); animation:starTwinkle 5.5s ease-in-out infinite 0.8s;"></div>
+      <div style="position:absolute; top:12%; left:64%; width:2.5px; height:2.5px; border-radius:50%; background:#ffd9a0; box-shadow:0 0 7px 2px rgba(255,205,140,0.8); animation:starTwinkle 7.5s ease-in-out infinite 2.4s;"></div>
+      <div style="position:absolute; top:82%; left:56%; width:2px; height:2px; border-radius:50%; background:#8be8d8; box-shadow:0 0 6px 2px rgba(120,225,205,0.8); animation:starTwinkle 6.5s ease-in-out infinite 4s;"></div>
+      <div style="position:absolute; top:52%; left:88%; width:2px; height:2px; border-radius:50%; background:#d8b5ff; box-shadow:0 0 6px 2px rgba(200,160,255,0.8); animation:starTwinkle 8s ease-in-out infinite 1.6s;"></div>
+      <div style="position:absolute; top:28%; left:38%; width:3.5px; height:3.5px; border-radius:50%; background:#fff; box-shadow:0 0 10px 3px rgba(255,255,255,0.85); animation:starTwinkle 9s ease-in-out infinite 3.2s;"></div>
+      <div style="position:absolute; top:88%; left:36%; width:2.5px; height:2.5px; border-radius:50%; background:#ffb98a; box-shadow:0 0 8px 2.5px rgba(255,170,110,0.8); animation:starTwinkle 6s ease-in-out infinite 0.4s;"></div>
+      <div style="position:absolute; top:6%; left:12%; width:2px; height:2px; border-radius:50%; background:#8fd8ff; box-shadow:0 0 7px 2px rgba(130,205,255,0.85); animation:starTwinkle 7s ease-in-out infinite 5.2s;"></div>
+      <div style="position:absolute; top:46%; left:70%; width:13px; height:13px; pointer-events:none; animation:sparkleStar 10s ease-in-out infinite 2s; transform:translate(-50%,-50%);"><span style="position:absolute; left:50%; top:0; bottom:0; width:1.2px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#fff,transparent);"></span><span style="position:absolute; top:50%; left:0; right:0; height:1.2px; transform:translateY(-50%); background:linear-gradient(90deg,transparent,#fff,transparent);"></span></div>
+      <!-- distant galaxy -->
+      <div style="position:absolute; left:24%; top:14%; width:44px; height:16px; border-radius:50%; filter:blur(2.5px); animation:galaxyBreathe 14s ease-in-out infinite; background:radial-gradient(50% 50% at 50% 50%, rgba(255,244,230,0.55), rgba(150,140,235,0.28) 45%, transparent 75%);"></div>
+      <!-- meteor shower : rare -->
+      <div style="position:absolute; top:6%; left:70%; width:80px; height:1.5px; pointer-events:none; z-index:2; opacity:0; animation:meteorOne 89s linear infinite 14s;"><span style="position:absolute; inset:0; border-radius:2px; background:linear-gradient(90deg,#fff,rgba(170,205,255,0.4),transparent);"></span></div>
+      <div style="position:absolute; top:3%; left:78%; width:64px; height:1.2px; pointer-events:none; z-index:2; opacity:0; animation:meteorOne 89s linear infinite 15.1s;"><span style="position:absolute; inset:0; border-radius:2px; background:linear-gradient(90deg,#e6efff,rgba(160,195,255,0.35),transparent);"></span></div>
+      <div style="position:absolute; top:10%; left:84%; width:52px; height:1px; pointer-events:none; z-index:2; opacity:0; animation:meteorOne 89s linear infinite 16.4s;"><span style="position:absolute; inset:0; border-radius:2px; background:linear-gradient(90deg,#d5e4ff,rgba(150,185,255,0.3),transparent);"></span></div>
+      <!-- lone asteroid : very rare, slow -->
+      <div style="position:absolute; top:38%; left:-4%; width:5px; height:4px; pointer-events:none; z-index:2; opacity:0; animation:asteroidDrift 151s linear infinite 40s;"><span style="position:absolute; inset:0; border-radius:45% 55% 50% 50%; background:#8d93a8; box-shadow:inset -1px -1px 1px rgba(0,0,0,0.6), 0 0 4px rgba(150,160,190,0.35);"></span></div>
+      <div style="position:absolute; inset:-4%; background-image:radial-gradient(1.3px 1.3px at 30px 40px,#ffffff 45%,transparent 55%),radial-gradient(1.1px 1.1px at 150px 110px,#dbe6ff 45%,transparent 55%),radial-gradient(1px 1px at 90px 180px,#ffffff 45%,transparent 55%),radial-gradient(1.2px 1.2px at 200px 60px,#c3f0e6 45%,transparent 55%),radial-gradient(1px 1px at 55px 15px,#ffd9b0 45%,transparent 55%),radial-gradient(1.1px 1.1px at 185px 175px,#c9d7ff 45%,transparent 55%); background-repeat:repeat; background-size:220px 220px; animation:bgdriftA 90s linear infinite;"></div>
+      <div style="position:absolute; inset:-4%; background-image:radial-gradient(0.9px 0.9px at 22px 96px,#ffffff 50%,transparent 62%),radial-gradient(0.8px 0.8px at 78px 34px,#e8eeff 50%,transparent 62%),radial-gradient(0.9px 0.9px at 132px 128px,#ffe6c8 50%,transparent 62%),radial-gradient(0.7px 0.7px at 44px 62px,#d3e8ff 50%,transparent 62%),radial-gradient(0.8px 0.8px at 104px 8px,#ffffff 50%,transparent 62%),radial-gradient(0.7px 0.7px at 12px 20px,#c8f0e4 50%,transparent 62%),radial-gradient(0.8px 0.8px at 66px 118px,#e5d8ff 50%,transparent 62%),radial-gradient(0.7px 0.7px at 118px 74px,#ffffff 50%,transparent 62%); background-repeat:repeat; background-size:140px 140px;"></div>
+      <div style="position:absolute; inset:-4%; background-image:radial-gradient(0.9px 0.9px at 60px 90px,#e9efff 50%,transparent 60%),radial-gradient(0.8px 0.8px at 170px 30px,#cdd9ff 50%,transparent 60%),radial-gradient(0.8px 0.8px at 250px 200px,#ffffff 50%,transparent 60%),radial-gradient(0.7px 0.7px at 110px 240px,#bfe9ff 50%,transparent 60%); background-repeat:repeat; background-size:300px 300px; animation:bgdriftB 150s linear infinite;"></div>
+      <div style="position:absolute; top:18%; left:24%; width:3px; height:3px; border-radius:50%; background:#ffffff; box-shadow:0 0 6px 1.5px rgba(220,232,255,0.9); animation:starTwinkle 4s ease-in-out infinite;"></div>
+      <div style="position:absolute; top:62%; left:74%; width:2.5px; height:2.5px; border-radius:50%; background:#dfe8ff; box-shadow:0 0 6px 1.5px rgba(190,212,255,0.85); animation:starTwinkle 6s ease-in-out infinite 1s;"></div>
+      <div style="position:absolute; top:34%; left:60%; width:2px; height:2px; border-radius:50%; background:#c8f2e8; box-shadow:0 0 5px 1.5px rgba(150,230,210,0.8); animation:starTwinkle 5s ease-in-out infinite 2s;"></div>
+      <div style="position:absolute; top:26%; left:82%; width:14px; height:14px; pointer-events:none; animation:sparkleStar 7s ease-in-out infinite 0.5s; transform:translate(-50%,-50%);"><span style="position:absolute; left:50%; top:0; bottom:0; width:1.2px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#fff,transparent);"></span><span style="position:absolute; top:50%; left:0; right:0; height:1.2px; transform:translateY(-50%); background:linear-gradient(90deg,transparent,#fff,transparent);"></span></div>
+      <div style="position:absolute; top:74%; left:18%; width:11px; height:11px; pointer-events:none; animation:sparkleStar 9s ease-in-out infinite 3s; transform:translate(-50%,-50%);"><span style="position:absolute; left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#cfe0ff,transparent);"></span><span style="position:absolute; top:50%; left:0; right:0; height:1px; transform:translateY(-50%); background:linear-gradient(90deg,transparent,#cfe0ff,transparent);"></span></div>
+      <div style="position:absolute; top:8%; left:44%; width:10px; height:10px; pointer-events:none; animation:sparkleStar 8s ease-in-out infinite 5s; transform:translate(-50%,-50%);"><span style="position:absolute; left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#b9f0e2,transparent);"></span><span style="position:absolute; top:50%; left:0; right:0; height:1px; transform:translateY(-50%); background:linear-gradient(90deg,transparent,#b9f0e2,transparent);"></span></div>
+      <div style="position:absolute; inset:-4%; background-image:radial-gradient(0.8px 0.8px at 40px 60px,#ffffff 55%,transparent 65%),radial-gradient(0.7px 0.7px at 120px 20px,#dfe8ff 55%,transparent 65%),radial-gradient(0.7px 0.7px at 20px 140px,#ffffff 55%,transparent 65%),radial-gradient(0.8px 0.8px at 90px 110px,#cfe0ff 55%,transparent 65%),radial-gradient(0.6px 0.6px at 150px 82px,#ffffff 55%,transparent 65%),radial-gradient(0.7px 0.7px at 62px 158px,#d9f2ea 55%,transparent 65%); background-repeat:repeat; background-size:170px 170px;"></div>
+      <div style="position:absolute; top:12%; left:82%; width:120px; height:2px; pointer-events:none; z-index:2; animation:cometA 47s linear infinite 6s; opacity:0;"><span style="position:absolute; inset:0; border-radius:2px; background:linear-gradient(90deg, #ffffff, rgba(170,205,255,0.5), transparent);"></span><span style="position:absolute; left:-2px; top:50%; transform:translate(0,-50%); width:4px; height:4px; border-radius:50%; background:#ffffff; box-shadow:0 0 10px 3px rgba(210,230,255,0.9);"></span></div>
+      <div style="position:absolute; top:66%; left:6%; width:90px; height:1.5px; pointer-events:none; z-index:2; animation:cometB 71s linear infinite 30s; opacity:0;"><span style="position:absolute; inset:0; border-radius:2px; background:linear-gradient(270deg, #ffffff, rgba(190,240,225,0.45), transparent);"></span><span style="position:absolute; right:-2px; top:50%; transform:translate(0,-50%); width:3px; height:3px; border-radius:50%; background:#ffffff; box-shadow:0 0 9px 3px rgba(190,240,225,0.85);"></span></div>
+
+      <!-- ALTITUDE LAYERS -->
+      <!-- Calendar : paper months on stars -->
+      <div onWheel="{{ onCalWheel }}" onPointerDown="{{ onCalPD }}" onPointerMove="{{ onCalPM }}" onPointerUp="{{ onCalPU }}" onPointerCancel="{{ onCalPU }}" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; padding:84px 16px 74px; box-sizing:border-box; opacity:{{ calOp }}; transform:{{ calTransform }}; pointer-events:{{ calPE }}; transition:opacity 0.25s ease, transform 0.12s ease;">
+        <div ref="{{ calScrollRef }}" class="rolls-scroll" style="width:{{ panelW }}; max-width:100%; flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:18px; padding:2px 2px 10px; touch-action:pan-y;"><sc-for list="{{ months }}" as="m" hint-placeholder-count="3">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-if value="{{ m.hasRolls }}" hint-placeholder-val="{{ true }}"><div style="display:flex; flex-direction:column; gap:6px;"><sc-for list="{{ m.rolls }}" as="rc" hint-placeholder-count="2"><div style="display:flex; align-items:center; gap:10px; background:rgba(14,19,30,0.42); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); border:1px solid rgba(190,205,235,0.10); border-radius:13px; padding:9px 12px;"><span style="flex:none; width:8px; height:8px; border-radius:50%; background:{{ rc.band }}; color:{{ rc.band }}; box-shadow:0 0 8px 2px currentColor; animation:dotpulse 2.4s ease-in-out infinite;"></span><span style="display:flex; flex-direction:column; gap:1px; min-width:0;"><span style="font-family:'Hanken Grotesk'; font-size:13px; font-weight:600; color:#EAF0FB;">{{ rc.name }}</span><span style="font-family:'DM Mono',monospace; font-size:9.5px; color:#7E8AA6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ rc.meta }}</span></span><span style="margin-left:auto; font-family:'Hanken Grotesk'; font-size:15px; color:#5C6987;">›</span></div></sc-for></div></sc-if>
+            <div style="width:100%; min-width:0; max-width:100%; box-sizing:border-box; overflow:hidden; background:rgba(14,19,30,0.46); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); border:none; border-radius:22px; padding:16px 14px 16px; box-shadow:0 18px 50px rgba(0,0,0,0.42);">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:13px; padding:0 2px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:600; color:#EAF0FB;">{{ m.name }}</span><span style="font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:0.07em; color:#7E8AA6;">{{ m.frameDays }} FRAME DAYS</span></div>
+              <div style="display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; margin-bottom:8px;"><sc-for list="{{ weekdayLabels }}" as="w" hint-placeholder-count="7"><span style="text-align:center; font-family:'Hanken Grotesk'; font-size:9px; font-weight:700; letter-spacing:0.04em; color:#5C6987;">{{ w.l }}</span></sc-for></div>
+              <div style="display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px;"><sc-for list="{{ m.days }}" as="d" hint-placeholder-count="35"><button onClick="{{ d.onTap }}" style="{{ d.cellStyle }}"><sc-if value="{{ d.hasPhoto }}" hint-placeholder-val="{{ false }}"><span style="{{ d.photoStyle }}"></span></sc-if><sc-if value="{{ d.emptyDot }}" hint-placeholder-val="{{ true }}"><span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:4px; height:4px; border-radius:50%; background:rgba(150,165,200,0.16);"></span></sc-if><sc-if value="{{ d.hasRoll }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ d.rollDots }}" as="rd" hint-placeholder-count="1"><span style="{{ rd.style }}"></span></sc-for></sc-if><sc-if value="{{ d.showNum }}" hint-placeholder-val="{{ false }}"><span style="{{ d.numStyle }}">{{ d.day }}</span></sc-if></button></sc-for></div>
+            </div>
+          </div>
+        </sc-for></div>
+        <sc-if value="{{ hasCalSel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:9; display:flex; align-items:center; gap:11px; background:#EFE9DB; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:13px; padding:9px 14px; box-shadow:0 16px 38px rgba(0,0,0,0.5); white-space:nowrap;"><span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--t-ink,#2A2823);">{{ calSelInfo.date }}</span><span style="width:1px; height:14px; background:rgba(var(--t-brgb,42,40,35),0.18);"></span><span style="font-family:'Hanken Grotesk'; font-size:12px; font-weight:600; color:var(--t-ink,#2A2823);">{{ calSelInfo.roll }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; color:var(--t-muted2,#8B8270);">{{ calSelInfo.frame }}</span><span style="font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; color:#A8703A;">Tap again to open ›</span></div></sc-if>
+      </div>
+
+      <!-- MAP : real map (Leaflet, CARTO voyager tiles) -->
+      <div style="position:absolute; inset:0; z-index:1; opacity:{{ mapLayerOp }}; transform:{{ mapLayerT }}; pointer-events:{{ mapPE }}; transition:opacity 0.42s ease, transform 0.7s cubic-bezier(0.45,0,0.2,1);">
+        <div ref="{{ mapElRef }}" class="rolls-map" style="position:absolute; inset:0; background:#EBE8E1;"></div>
+        <div style="position:absolute; right:10px; bottom:8px; z-index:410; font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.04em; color:rgba(70,80,105,0.9); pointer-events:none;">© OpenStreetMap · CARTO</div>
+      </div>
+
+      <!-- GLOBE : real 3D earth (three.js) -->
+      <div style="position:absolute; inset:0; z-index:1; opacity:{{ globeLayerOp }}; transform:{{ globeLayerT }}; pointer-events:{{ globePE }}; transition:opacity 0.5s ease, transform 0.85s cubic-bezier(0.22,1,0.36,1);">
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:76%; aspect-ratio:1/1; max-width:500px; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(96,140,220,0.20), transparent 62%); filter:blur(8px);"></div>
+        <div ref="{{ globeElRef }}" style="position:absolute; inset:0; touch-action:none; cursor:grab;"></div>
+      </div>
+
+      <!-- view travel : mini globe (calendar open) / calendar orb (map or globe open) -->
+      <div style="position:absolute; right:14px; bottom:18px; z-index:8; display:flex; flex-direction:column; gap:9px;">
+        <sc-if value="{{ showGlobeBtn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goMapBtn }}" title="Into the map" style="appearance:none; cursor:pointer; position:relative; width:40px; height:40px; padding:0; border:none; background:transparent;"><span style="position:absolute; inset:0; border-radius:50%; overflow:hidden; background:radial-gradient(circle at 34% 28%, #6f8dbb 0%, #3c5480 42%, #1d2a48 78%, #131c32 100%); box-shadow:inset -5px -6px 12px rgba(0,0,0,0.55), inset 4px 4px 10px rgba(190,215,255,0.22), 0 0 14px rgba(120,160,240,0.35);"><span style="position:absolute; inset:-30%; background-image:radial-gradient(3px 2px at 12px 14px, rgba(150,210,175,0.8), transparent), radial-gradient(4px 2.5px at 30px 24px, rgba(140,200,165,0.7), transparent), radial-gradient(3px 2px at 22px 34px, rgba(150,210,175,0.6), transparent), radial-gradient(3.5px 2px at 42px 10px, rgba(150,210,175,0.65), transparent); background-repeat:repeat; background-size:48px 44px; animation:minispin 16s linear infinite;"></span><span style="position:absolute; inset:0; background:radial-gradient(circle at 32% 26%, rgba(255,255,255,0.32), transparent 44%);"></span></span></button></sc-if>
+        <sc-if value="{{ showCalBtn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goCalBtn }}" title="Back to the calendar" style="appearance:none; cursor:pointer; position:relative; width:40px; height:40px; padding:0; border:none; background:transparent; filter:drop-shadow(0 5px 10px rgba(0,0,0,0.5));"><span style="position:absolute; left:50%; top:50%; width:28px; height:27px; margin:-13px 0 0 -14px; animation:calSwing 5.5s ease-in-out infinite; transform-origin:50% 10%;"><span style="position:absolute; left:1.5px; top:4px; right:-1.5px; bottom:-2.5px; border-radius:5px; background:#c8cbd4;"></span><span style="position:absolute; left:0.5px; top:4px; right:-0.5px; bottom:-1px; border-radius:5px; background:#dde0e8;"></span><span style="position:absolute; left:0; top:3px; right:0; bottom:0; border-radius:5px; background:linear-gradient(165deg, #f7f8fb, #e6e8ee); overflow:hidden;"><span style="position:absolute; left:0; right:0; top:0; height:8.5px; background:linear-gradient(165deg, #e8756a, #cf4a3e);"></span><span style="position:absolute; left:0; right:0; top:11px; text-align:center; font-family:'Hanken Grotesk'; font-size:10.5px; font-weight:800; color:#2c3348; line-height:1;">14</span></span><span style="position:absolute; left:6px; top:0; width:4px; height:7px; border:1.6px solid #2c3348; border-radius:3px; box-sizing:border-box; background:transparent;"></span><span style="position:absolute; right:6px; top:0; width:4px; height:7px; border:1.6px solid #2c3348; border-radius:3px; box-sizing:border-box; background:transparent;"></span></span></button></sc-if>
+      </div>
+
+      <!-- WARP BURST : plays on map ↔ globe travel -->
+      <sc-if value="{{ hasWarp }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:6; pointer-events:none; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(150,180,255,0.34), rgba(110,150,235,0.10) 45%, transparent 70%); animation:warpFlash 0.9s ease-out both;"></div>
+        <div style="position:absolute; left:50%; top:50%; width:150%; aspect-ratio:1/1; transform:translate(-50%,-50%); border-radius:50%; background:repeating-conic-gradient(from 0deg, rgba(165,190,255,0.30) 0deg 1deg, transparent 1deg 9deg); -webkit-mask-image:radial-gradient(circle, transparent 24%, #000 44%, transparent 70%); mask-image:radial-gradient(circle, transparent 24%, #000 44%, transparent 70%); animation:warpBurst 0.95s cubic-bezier(0.22,1,0.36,1) both;"></div>
+      </div>
+      </sc-if>
+
+      <!-- PHOTO EXPANDED -->
+      <sc-if value="{{ hasPhotoOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closePhoto }}" style="position:absolute; inset:0; z-index:20; background:rgba(4,6,14,0.74); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); animation:scrimIn 0.2s ease both;"></div>
+      <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:21; width:min(78%, 340px); display:flex; flex-direction:column; gap:14px; animation:scrimIn 0.22s ease both;">
+        <div style="position:relative; width:100%; aspect-ratio:4/5; border-radius:18px; border:4px solid #ffffff; box-sizing:border-box; background:{{ photoOpenTone }}; box-shadow:0 30px 80px rgba(0,0,0,0.6);">
+          <button onClick="{{ closePhoto }}" style="appearance:none; cursor:pointer; position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; border:none; background:rgba(10,14,26,0.55); color:#EAF0FB; font-size:14px; backdrop-filter:blur(4px);">✕</button>
+          <div style="position:absolute; left:14px; bottom:12px; display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:600; color:#fff; text-shadow:0 1px 8px rgba(0,0,0,0.6);">{{ photoOpenLabel }}</span><span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.06em; color:rgba(255,255,255,0.85); text-shadow:0 1px 6px rgba(0,0,0,0.7);">{{ photoOpenMeta }}</span></div>
+        </div>
+        <button onClick="{{ goToFrame }}" style="appearance:none; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:#EFE9DB; color:#2A2823; border:none; border-radius:14px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; box-shadow:0 14px 34px rgba(0,0,0,0.45);">Go to this frame ›</button>
+      </div>
+      </sc-if>
+
+      <!-- cosmos chrome -->
+      <div style="position:absolute; top:0; left:0; right:0; height:120px; z-index:7; background:linear-gradient(180deg, rgba(4,6,14,0.78), rgba(4,6,14,0) 100%); pointer-events:none;"></div>
+      <button onClick="{{ goHome }}" style="appearance:none; cursor:pointer; position:absolute; left:12px; top:{{ cosmosTop }}; z-index:8; display:flex; align-items:center; gap:6px; background:transparent; border:none; padding:6px 8px; color:#C9D2E6; font-family:'Hanken Grotesk'; font-size:14px; font-weight:600; text-shadow:0 1px 6px rgba(0,0,0,0.7);">‹ Shelf</button>
+      <div style="position:absolute; left:50%; top:{{ cosmosTop }}; transform:translateX(-50%); z-index:8; text-align:center; pointer-events:none;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:16px; font-weight:600; color:#EAF0FB;">{{ altTitle }}</div><div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; color:#8EA0C8;">{{ altSub }}</div></div>
+
+
+    </div>
+
+  </div>
+
+  <!-- ===== ROLL START ANIMATION ===== -->
+  <sc-if value="{{ rollAnimOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; inset:0; z-index:70; background:rgba(26,24,21,0.18); backdrop-filter:grayscale(1) brightness(0.92); -webkit-backdrop-filter:grayscale(1) brightness(0.92); display:flex; align-items:center; justify-content:center; animation:scrimIn 0.15s ease both;">
+    <div style="width:290px; box-sizing:border-box; display:flex; align-items:center; overflow:hidden; filter:drop-shadow(0 14px 30px rgba(0,0,0,0.35));">
+      <div style="flex:none; position:relative; width:52px; height:66px; z-index:2; animation:rollRecoil 0.55s ease;">
+        <div style="position:absolute; left:14px; top:0; width:24px; height:6px; border-radius:3px 3px 0 0; background:var(--t-muted2,#8B8270);"></div>
+        <div style="position:absolute; left:3px; top:6px; right:3px; bottom:0; border:2px solid var(--t-ink,#2A2823); border-radius:7px; background:var(--t-card2,#F4EFE3);"></div>
+        <div style="position:absolute; left:5px; top:32px; right:5px; height:11px; background:{{ rollAnimColor }};"></div>
+        <div style="position:absolute; right:0px; top:24px; bottom:14px; width:3px; background:var(--t-ink,#2A2823); border-radius:2px;"></div>
+      </div>
+      <div style="position:relative; z-index:1; overflow:hidden; height:44px; width:14px; margin-left:-9px; border-radius:0 2px 2px 0; animation:rollOut 0.55s cubic-bezier(0.22,0.9,0.32,1.2) 0.12s forwards;">
+        <div style="position:absolute; right:0; top:0; height:100%; width:212px; background:#33302A; clip-path:polygon(0 0, calc(100% - 30px) 0, calc(100% - 30px) 46%, 100% 46%, 100% 100%, 0 100%);">
+          <div style="position:absolute; left:0; right:0; top:3px; height:5px; background:repeating-linear-gradient(90deg,var(--t-card,#F1ECE0) 0 5px,transparent 5px 13px);"></div>
+          <div style="position:absolute; left:0; right:0; bottom:3px; height:5px; background:repeating-linear-gradient(90deg,var(--t-card,#F1ECE0) 0 5px,transparent 5px 13px);"></div>
+          <div style="position:absolute; left:0; right:0; top:10px; bottom:10px; background:repeating-linear-gradient(90deg,transparent 0 34px,rgba(255,255,255,0.10) 34px 36px);"></div>
+          <span style="position:absolute; right:38px; top:50%; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; color:#E8C583; opacity:0; animation:rollPop 0.24s ease 0.54s forwards;">01</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===== NEW ROLL SHEET ===== -->
+  <sc-if value="{{ newRollOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div onPointerDown="{{ stopSwipe }}" onPointerMove="{{ stopSwipe }}" style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:700; color:var(--t-ink,#2A2823);">Load a new roll</span><button onClick="{{ closeSheets }}" style="appearance:none; cursor:pointer; background:var(--t-paper,#E8E1D3); border:none; width:30px; height:30px; border-radius:50%; font-size:15px; color:var(--t-muted4,#6E675B);">✕</button></div>
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Roll name</label>
+    <input value="{{ d_name }}" onChange="{{ onName }}" placeholder="e.g. Late summer" style="width:100%; box-sizing:border-box; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:12px; background:var(--t-field,#FBF8F0); padding:13px 14px; font-family:'Hanken Grotesk',sans-serif; font-size:16px; color:var(--t-ink,#2A2823); outline:none; margin-bottom:16px;" />
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Film stock</label>
+    <input value="{{ d_film }}" onChange="{{ onFilm }}" placeholder="Type a film stock…" style="width:100%; box-sizing:border-box; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:12px; background:var(--t-field,#FBF8F0); padding:11px 13px; font-family:'Hanken Grotesk'; font-size:14px; color:var(--t-ink,#2A2823); outline:none; margin-bottom:8px;" />
+    <div class="rolls-scroll" onPointerDown="{{ chipPD }}" onPointerMove="{{ chipPM }}" onPointerUp="{{ chipPU }}" onPointerCancel="{{ chipPU }}" onWheel="{{ chipWheel }}" style="display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; touch-action:pan-x; cursor:grab;"><sc-for list="{{ filmChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Camera body</label>
+    <input value="{{ d_camera }}" onChange="{{ onCamera }}" placeholder="Type a camera…" style="width:100%; box-sizing:border-box; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:12px; background:var(--t-field,#FBF8F0); padding:11px 13px; font-family:'Hanken Grotesk'; font-size:14px; color:var(--t-ink,#2A2823); outline:none; margin-bottom:8px;" />
+    <div class="rolls-scroll" onPointerDown="{{ chipPD }}" onPointerMove="{{ chipPM }}" onPointerUp="{{ chipPU }}" onPointerCancel="{{ chipPU }}" onWheel="{{ chipWheel }}" style="display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; touch-action:pan-x; cursor:grab;"><sc-for list="{{ cameraChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+
+    <div style="display:flex; gap:14px; margin-bottom:18px;">
+      <div style="flex:1;"><label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Frames</label><div style="display:flex; gap:6px;"><sc-for list="{{ countOpts }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div><sc-if value="{{ isCustomCount }}" hint-placeholder-val="{{ false }}"><input value="{{ d_customCount }}" onChange="{{ onCustomCount }}" placeholder="No. of frames" inputmode="numeric" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:10px; background:var(--t-field,#FBF8F0); padding:9px 12px; font-family:'DM Mono',monospace; font-size:14px; color:var(--t-ink,#2A2823); outline:none;" /></sc-if></div>
+      <div style="flex:1;"><label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Format</label><div style="display:flex; gap:6px;"><sc-for list="{{ formatOpts }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div>
+    </div>
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Start from</label>
+    <div style="display:flex; gap:7px; margin-bottom:8px;"><sc-for list="{{ startOpts }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+    <sc-if value="{{ isCustomStart }}" hint-placeholder-val="{{ false }}"><input value="{{ d_startFrame }}" onChange="{{ onStartFrame }}" placeholder="Begin at frame #" inputmode="numeric" style="width:100%; box-sizing:border-box; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:10px; background:var(--t-field,#FBF8F0); padding:11px 13px; font-family:'DM Mono',monospace; font-size:14px; color:var(--t-ink,#2A2823); outline:none;" /></sc-if>
+    <div style="height:18px;"></div>
+    <button onClick="{{ loadRoll }}" style="appearance:none; width:100%; cursor:pointer; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:14px; padding:15px; font-family:'Hanken Grotesk'; font-size:15px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Load into camera</button>
+  </div>
+  </sc-if>
+
+  <!-- ===== PROFILE SHEET ===== -->
+  <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;"><span style="font-family:'DM Mono',monospace; font-size:18px; font-weight:500; letter-spacing:-0.01em; color:var(--t-ink,#2A2823);">Account</span><button onClick="{{ closeSheets }}" style="appearance:none; cursor:pointer; background:var(--t-paper,#E8E1D3); border:none; width:30px; height:30px; border-radius:50%; font-size:15px; color:var(--t-muted4,#6E675B);">✕</button></div>
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:22px;"><span style="{{ avatarSm }}">{{ avatarSmInitials }}</span><div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'DM Mono',monospace; font-size:17px; font-weight:500; letter-spacing:-0.01em; color:var(--t-ink,#2A2823);">{{ profileName }}</span><span style="font-family:'DM Mono',monospace; font-size:12px; color:var(--t-muted,#9A9280);">@{{ profileHandle }}</span></div></div>
+    <div style="display:flex; flex-direction:column;"><sc-for list="{{ settingsRows }}" as="row" hint-placeholder-count="6"><button onClick="{{ row.onClick }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; background:transparent; border:none; border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.08); padding:14px 2px; display:flex; align-items:center; justify-content:space-between; gap:10px;"><span style="font-family:'Hanken Grotesk'; font-size:15px; color:{{ row.color }};">{{ row.label }}</span><span style="display:flex; align-items:center; gap:8px;"><span style="font-family:'DM Mono',monospace; font-size:12px; color:var(--t-muted,#9A9280);">{{ row.value }}</span><span style="font-family:'Hanken Grotesk'; font-size:15px; color:#B8AF9C;">{{ row.hint }}</span></span></button></sc-for></div>
+  </div>
+  </sc-if>
+
+  <!-- ===== MOBILE FRAME LOGGING (full-screen, in-app) ===== -->
+  <sc-if value="{{ mobileRollOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; inset:0; z-index:34; background:var(--t-paper,#E8E1D3); animation:sheetIn 0.26s cubic-bezier(0.22,1,0.36,1) both;">
+    <dc-import name="Frame Logging Screen" mode="mobile" variant="A" embedded="true" on-status-change="{{ onRollStatus }}" theme="{{ themeName }}" appearance="{{ appearance }}" roll-key="{{ mSelKey }}" scans="{{ mSelScans }}" frames="{{ mSelFrames }}" live="{{ isLive }}" on-frames-change="{{ mSelFramesChange }}" frame0="{{ mSelFrame }}" roll-name="{{ mSelName }}" film="{{ mSelFilm }}" camera="{{ mSelCamera }}" fmt="{{ mSelFormat }}" capacity="{{ mSelTotal }}" shot="{{ mSelShot }}" on-back="{{ closeMobileRoll }}" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+  </div>
+  </sc-if>
+
+  <!-- ===== DEFAULT FILM SHEET ===== -->
+  <sc-if value="{{ defaultFilmOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;"><button onClick="{{ backToProfile }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:var(--t-muted2,#8B8270);">‹ Back</button><span style="font-family:'Hanken Grotesk'; font-size:16px; font-weight:800; color:var(--t-ink,#2A2823);">Default film</span><span style="width:38px;"></span></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:12px; color:var(--t-muted2,#8B8270); margin-bottom:14px;">Pre-selected when you load a new roll.</span>
+    <div style="display:flex; flex-direction:column;"><sc-for list="{{ defaultFilmRows }}" as="fr" hint-placeholder-count="8">
+      <button onClick="{{ fr.onPick }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; gap:12px; background:transparent; border:none; border-bottom:1px solid rgba(var(--t-brgb,42,40,35),0.08); padding:13px 4px;">
+        <span style="flex:none; width:12px; height:16px; border-radius:3px; background:{{ fr.band }}; border:1px solid rgba(0,0,0,0.2);"></span>
+        <span style="flex:1; font-family:'Hanken Grotesk'; font-size:15px; color:var(--t-ink,#2A2823);">{{ fr.name }}</span>
+        <span style="flex:none; font-size:14px; font-weight:800; color:var(--t-ink,#2A2823);">{{ fr.mark }}</span>
+      </button>
+    </sc-for></div>
+  </div>
+  </sc-if>
+
+  <!-- ===== EXPORT SHEET ===== -->
+  <sc-if value="{{ exportOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;"><button onClick="{{ backToProfile }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:var(--t-muted2,#8B8270);">‹ Back</button><span style="font-family:'Hanken Grotesk'; font-size:16px; font-weight:800; color:var(--t-ink,#2A2823);">Export library</span><span style="width:38px;"></span></div>
+    <input type="file" accept="application/json,.json" ref="{{ importInputRef }}" onChange="{{ onImportFile }}" style="display:none;">
+    <div style="display:flex; flex-direction:column; gap:9px;"><sc-for list="{{ exportRows }}" as="er" hint-placeholder-count="4">
+      <button onClick="{{ er.onPick }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; display:flex; flex-direction:column; gap:2px; background:var(--t-card,#F1ECE0); border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:13px; padding:13px 15px;">
+        <span style="font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; color:var(--t-ink,#2A2823);">{{ er.name }}</span>
+        <span style="font-family:'Hanken Grotesk'; font-size:12px; color:var(--t-muted2,#8B8270);">{{ er.sub }}</span>
+      </button>
+    </sc-for></div>
+  </div>
+  </sc-if>
+
+  <!-- ===== SIGN OUT CONFIRM ===== -->
+  <sc-if value="{{ signOutOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:41; width:min(78%, 320px); background:var(--t-panel,#F2ECE0); border-radius:18px; padding:20px; box-sizing:border-box; box-shadow:0 24px 60px rgba(0,0,0,0.35);">
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:16px; font-weight:800; color:var(--t-ink,#2A2823); margin-bottom:6px;">Sign out?</span>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:13px; line-height:1.5; color:var(--t-muted3,#7A7264); margin-bottom:16px;">Your rolls stay safely synced to your account.</span>
+    <div style="display:flex; gap:9px;">
+      <button onClick="{{ backToProfile }}" style="appearance:none; cursor:pointer; flex:1; background:transparent; border:1px solid rgba(var(--t-brgb,42,40,35),0.18); border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:var(--t-ink,#2A2823);">Cancel</button>
+      <button onClick="{{ doSignOut }}" style="appearance:none; cursor:pointer; flex:1; background:#B03A2E; border:none; border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:#FBF4E8;">Sign out</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===== THEME SHEET ===== -->
+  <sc-if value="{{ themeOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;"><button onClick="{{ backToProfile }}" style="appearance:none; cursor:pointer; background:transparent; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:var(--t-muted2,#8B8270);">‹ Back</button><span style="font-family:'Hanken Grotesk'; font-size:16px; font-weight:800; color:var(--t-ink,#2A2823);">Theme</span><span style="width:38px;"></span></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:8px;">Appearance</span>
+    <div style="display:flex; gap:6px; margin-bottom:6px;"><sc-for list="{{ appearanceOpts }}" as="ao" hint-placeholder-count="3"><button onClick="{{ ao.onPick }}" style="{{ ao.style }}">{{ ao.label }}</button></sc-for></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; color:var(--t-muted2,#8B8270); margin-bottom:16px;">System follows your device's light/dark setting.</span>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:8px;">Film stock</span>
+    <div style="display:flex; flex-direction:column; gap:8px;"><sc-for list="{{ themeRows }}" as="tr" hint-placeholder-count="6">
+      <button onClick="{{ tr.onPick }}" style="appearance:none; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; gap:12px; background:var(--t-card,#F1ECE0); border:{{ tr.border }}; border-radius:13px; padding:12px 14px;">
+        <span style="flex:none; display:flex; gap:4px;"><sc-for list="{{ tr.swatches }}" as="sw" hint-placeholder-count="4"><span style="width:15px; height:15px; border-radius:50%; background:{{ sw.c }}; border:1px solid rgba(0,0,0,0.18);"></span></sc-for></span>
+        <span style="flex:1; min-width:0; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700; color:var(--t-ink,#2A2823);">{{ tr.name }}</span>
+        <span style="flex:none; font-size:14px; font-weight:800; color:var(--t-ink,#2A2823);">{{ tr.mark }}</span>
+      </button>
+    </sc-for></div>
+  </div>
+  </sc-if>
+
+  <!-- ===== BULK SCAN MATCH SHEET ===== -->
+  <sc-if value="{{ scansOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <input type="file" accept="image/*" multiple ref="{{ scanInputRef }}" onChange="{{ onScanFiles }}" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:19px; font-weight:700; color:var(--t-ink,#2A2823);">Scans are back</span><button onClick="{{ closeSheets }}" style="appearance:none; cursor:pointer; background:var(--t-paper,#E8E1D3); border:none; width:30px; height:30px; border-radius:50%; font-size:15px; color:var(--t-muted4,#6E675B); line-height:1;">✕</button></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:12px; color:var(--t-muted2,#8B8270); margin-bottom:14px;">{{ scanRollName }} · {{ scanRollTotal }} frames. Scans match in shooting order — you can re-do any frame individually after.</span>
+    <button onClick="{{ addScansClick }}" style="appearance:none; width:100%; cursor:pointer; background:transparent; color:var(--t-ink2,#46423A); border:1.5px dashed rgba(var(--t-brgb,42,40,35),0.28); border-radius:12px; padding:12px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; margin-bottom:14px;">＋ Add scans</button>
+    <div class="rolls-scroll" style="display:grid; grid-template-columns:repeat(6,1fr); gap:6px; max-height:280px; overflow-y:auto; margin-bottom:10px;"><sc-for list="{{ scanSlots }}" as="sl" hint-placeholder-count="36"><div data-scan-idx="{{ sl.idx }}" onPointerDown="{{ scanPD }}" onPointerMove="{{ scanPM }}" onPointerUp="{{ scanPU }}" onPointerCancel="{{ scanPU }}" style="{{ sl.style }}"></div></sc-for></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; color:var(--t-muted,#9A9280); margin-bottom:10px;">Drag a scan to re-order · drag it down here to remove it.</span>
+    <div data-scan-trash="1" style="{{ scanTrashStyle }}"><span style="pointer-events:none; display:flex; align-items:center; gap:8px;"><span style="position:relative; width:12px; height:14px; display:inline-block;"><span style="position:absolute; left:1px; right:1px; top:4px; bottom:0; border:1.5px solid currentColor; border-top:none; border-radius:0 0 3px 3px; box-sizing:border-box;"></span><span style="position:absolute; left:-1px; right:-1px; top:1px; height:2px; background:currentColor; border-radius:1px;"></span></span>Drop to remove</span></div>
+    <sc-if value="{{ hasScans }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ matchScans }}" style="appearance:none; width:100%; cursor:pointer; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:13px; padding:14px; font-family:'Hanken Grotesk'; font-size:14px; font-weight:700;">{{ matchLabel }}</button>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ===== EDIT PROFILE SHEET ===== -->
+  <sc-if value="{{ editProfileOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSheets }}" style="position:absolute; inset:0; background:rgba(26,24,21,0.42); z-index:40; animation:scrimIn 0.18s ease both;"></div>
+  <div style="{{ sheetStyle }}">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;"><button onClick="{{ backToProfile }}" style="appearance:none; cursor:pointer; display:flex; align-items:center; gap:5px; background:transparent; border:none; padding:0; font-family:'Hanken Grotesk'; font-size:14px; font-weight:600; color:var(--t-muted3,#7A7264);"><span style="font-size:17px; line-height:1;">‹</span> Account</button><span style="font-family:'DM Mono',monospace; font-size:18px; font-weight:500; letter-spacing:-0.01em; color:var(--t-ink,#2A2823);">Edit profile</span><button onClick="{{ closeSheets }}" style="appearance:none; cursor:pointer; background:var(--t-paper,#E8E1D3); border:none; width:30px; height:30px; border-radius:50%; font-size:15px; color:var(--t-muted4,#6E675B);">✕</button></div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:24px;">
+      <input type="file" accept="image/*" ref="{{ avatarInputRef }}" onChange="{{ onAvatarFile }}" style="display:none;">
+      <span style="{{ avatarLg }}">{{ avatarLgInitials }}</span>
+      <button onClick="{{ onChangePhoto }}" style="appearance:none; cursor:pointer; background:var(--t-chip,#EDE7D9); border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:10px; padding:9px 16px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:600; color:var(--t-ink2,#46423a);">Change profile image</button>
+    </div>
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Name in Rolls</label>
+    <input value="{{ d_pName }}" onChange="{{ onProfileName }}" placeholder="Display name" style="width:100%; box-sizing:border-box; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:10px; background:var(--t-field,#FBF8F0); padding:12px 13px; font-family:'Hanken Grotesk'; font-size:15px; color:var(--t-ink,#2A2823); outline:none; margin-bottom:16px;" />
+
+    <label style="display:block; font-family:'Hanken Grotesk'; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--t-muted,#9A9280); margin-bottom:7px;">Account name</label>
+    <div style="display:flex; align-items:center; border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:10px; background:var(--t-field,#FBF8F0); padding:0 13px; margin-bottom:8px;"><span style="font-family:'DM Mono',monospace; font-size:15px; color:var(--t-muted,#9A9280);">@</span><input value="{{ d_pHandle }}" onChange="{{ onProfileHandle }}" placeholder="username" style="flex:1; min-width:0; border:none; background:transparent; padding:12px 0 12px 3px; font-family:'DM Mono',monospace; font-size:15px; color:var(--t-ink,#2A2823); outline:none;" /></div>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:11px; color:var(--t-muted,#9A9280); margin-bottom:24px;">This is your unique handle for signing in and sharing.</span>
+
+    <button onClick="{{ saveProfile }}" style="appearance:none; width:100%; cursor:pointer; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; border-radius:14px; padding:15px; font-family:'Hanken Grotesk'; font-size:15px; font-weight:700; box-shadow:0 6px 16px rgba(38,36,31,0.26);">Save changes</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasConfirmDelete }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ cancelDelete }}" style="position:absolute; inset:0; z-index:60; background:rgba(26,24,21,0.46); animation:scrimIn 0.16s ease both;"></div>
+  <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:61; width:min(82%, 320px); background:var(--t-card2,#F4EFE3); border:1px solid rgba(var(--t-brgb,42,40,35),0.12); border-radius:16px; padding:20px 20px 16px; box-shadow:0 24px 60px rgba(0,0,0,0.35); animation:scrimIn 0.18s ease both;">
+    <span style="display:block; font-family:'Hanken Grotesk',sans-serif; font-size:17px; font-weight:700; color:var(--t-ink,#2A2823); margin-bottom:6px;">Delete “{{ confirmDelName }}”?</span>
+    <span style="display:block; font-family:'Hanken Grotesk'; font-size:13px; line-height:1.5; color:var(--t-muted3,#7A7264); margin-bottom:16px;">{{ confirmDelMeta }}. This can’t be undone.</span>
+    <div style="display:flex; gap:9px;">
+      <button onClick="{{ cancelDelete }}" style="appearance:none; cursor:pointer; flex:1; background:transparent; border:1px solid rgba(var(--t-brgb,42,40,35),0.18); border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:var(--t-ink2,#46423a);">Cancel</button>
+      <button onClick="{{ confirmDeleteRoll }}" style="appearance:none; cursor:pointer; flex:1; background:#B03A2E; border:none; border-radius:11px; padding:11px; font-family:'Hanken Grotesk'; font-size:13px; font-weight:700; color:#FBF4E8;">Delete roll</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="{{ toastStyle }}">{{ toast }}</div></sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mobile&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;mobile&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;cosmos&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;zoom0&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:10,&quot;min&quot;:0,&quot;max&quot;:100,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this._sx = null; this._sy = null; this._axis = null; this._w = 0;
+    this._zt = null; this._zoomDrag = false;
+    this._wantCalScroll = true; this._calScrolled = false;
+    this._toastTimer = null;
+
+    this.filmPalettes = {
+      'Kodak Portra 400': { strip:'#2A2620', accent:'#D8A24B', deep:'#A8732E', body:'#8a6b3a', band:'#e9d9bc', brand:'#7a5a26', brandT:'KODAK' },
+      'Kodak Gold 200':   { strip:'#23200F', accent:'#E9B824', deep:'#7E2E86', body:'#b78a17', band:'#f3e2a6', brand:'#7E2E86', brandT:'KODAK' },
+      'CineStill 800T':   { strip:'#0E2026', accent:'#26A9B7', deep:'#D23B3B', body:'#15414a', band:'#cfe7ea', brand:'#D23B3B', brandT:'CINESTILL' },
+      'Ilford HP5 Plus':  { strip:'#1A1A1B', accent:'#C9CBCD', deep:'#6B6C6E', body:'#2b2b2d', band:'#d9dadb', brand:'#1a1a1b', brandT:'ILFORD' },
+      'Fujifilm Superia 400': { strip:'#0F241A', accent:'#3CB24E', deep:'#0E7A3A', body:'#15452a', band:'#d3ead6', brand:'#0E7A3A', brandT:'FUJIFILM' },
+      'Fujifilm Pro 400H':{ strip:'#12241F', accent:'#74C8A8', deep:'#2E8C72', body:'#1d4a3d', band:'#d6ece4', brand:'#2E8C72', brandT:'FUJIFILM' },
+      'Fujifilm Velvia 50':{ strip:'#2A1018', accent:'#E23A6D', deep:'#9C1F4A', body:'#5e1530', band:'#f4d2dd', brand:'#E23A6D', brandT:'FUJIFILM' },
+    };
+    this.defaultPalette = { strip:'var(--t-btn,#26241F)', accent:'#C79A55', deep:'#B07F37', body:'#5a544a', band:'#e3dccb', brand:'#3a362e', brandT:'FILM' };
+
+    // demo=true → design showcase with sample library; otherwise the real, persisted library (starts empty)
+    this.demo = props.demo === true || props.demo === 'true';
+    this.demoRolls = [
+      { id:1, name:'Summer',      film:'Kodak Portra 400',    camera:'Nikon FM2',         format:'35mm', total:36, shot:12, status:'active', date:'Jun 18', ts:20260618 },
+      { id:2, name:'Night Walks', film:'CineStill 800T',      camera:'Canon AE-1',        format:'35mm', total:36, shot:7,  status:'active', date:'Jun 14', ts:20260614 },
+      { id:3, name:'Coastline',   film:'Fujifilm Pro 400H',   camera:'Pentax 67',         format:'120',  total:10, shot:10, status:'done',   date:'Jun 8',  ts:20260608 },
+      { id:4, name:'City B&W',    film:'Ilford HP5 Plus',     camera:'Leica M6',          format:'35mm', total:36, shot:36, status:'done',   date:'May 30', ts:20260530 },
+      { id:5, name:'Spring Trip', film:'Kodak Gold 200',      camera:'Olympus Mju II',    format:'35mm', total:24, shot:24, status:'done',   date:'May 12', ts:20260512 },
+      { id:6, name:'Studio',      film:'Fujifilm Velvia 50',  camera:'Hasselblad 500C/M', format:'120',  total:12, shot:12, status:'done',   date:'Apr 28', ts:20260428 },
+    ];
+    this.rolls = this.demo ? this.demoRolls : [];
+    this.libFrames = {};
+
+    this.filmQuick = ['Kodak Portra 400','Kodak Gold 200','CineStill 800T','Ilford HP5 Plus','Fujifilm Superia 400'];
+    this.cameraQuick = ['Nikon FM2','Canon AE-1','Olympus Mju II','Leica M6','Pentax K1000'];
+
+    this.state = {
+      view: (props.view === 'cosmos') ? 'cosmos' : 'home',
+      dragPx: 0, dragging: false,
+      zoom: (props.zoom0 != null) ? Number(props.zoom0) : 10,
+      sheet: props.sheet0 || null, toast: null, calSel: null, photoOpen: null, mobileRollId: props.roll0 ? Number(props.roll0) : null, warp: null,
+      rolls: this.rolls.slice(),
+      selectedRollId: null,
+      sortKey: 'date', sortDir: 'desc', swipedRollId: null,
+      defaultFilm: (function(){ try { return localStorage.getItem('rolls_default_film'); } catch (e) { return null; } })() || 'Kodak Portra 400',
+      units: (function(){ try { return localStorage.getItem('rolls_units'); } catch (e) { return null; } })() || 'Metric',
+      themeName: props.theme0 || (function(){ try { return localStorage.getItem('rolls_theme'); } catch (e) { return null; } })() || 'Portra 400',
+      appearance: props.appearance0 || (function(){ try { return localStorage.getItem('rolls_appearance'); } catch (e) { return null; } })() || 'system', confirmDelete: null, jumpFrame: null, scanRollId: null, scanThumbs: [], scanDrag: null,
+      profile: this.demo ? { name:'Alex Mercer', handle:'alexmercer' } : { name:'', handle:'', avatar:'' },
+      profileDraft: this.demo ? { name:'Alex Mercer', handle:'alexmercer' } : { name:'', handle:'', avatar:'' },
+      libReady: this.demo,
+      draft: { name:'', film:'', camera:'', count:'36', customCount:'', format:'35mm', startMode:'new', startFrame:'' },
+    };
+  }
+
+  pal(film) { return this.filmPalettes[film] || this.defaultPalette; }
+  shortCam(c) { return c; }
+
+  toastMsg = (m) => { this.setState({ toast:m }); clearTimeout(this._toastTimer); this._toastTimer = setTimeout(() => this.setState({ toast:null }), 1700); };
+
+  stopSwipe = (e) => e.stopPropagation();
+
+  // ---- theme engine ----
+  themeRootRef = (el) => { if (el) { this._themeRoot = el; this.applyTheme(); } };
+  initTheme = () => {
+    import('./themes.js').then((m) => {
+      this._themesMod = m;
+      this._mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const onCh = () => this.applyTheme();
+      try { this._mq.addEventListener('change', onCh); } catch (e) { this._mq.addListener(onCh); }
+      this.applyTheme(); this.forceUpdate();
+    }).catch(() => {});
+  };
+  applyTheme = () => {
+    if (!this._themesMod || !this._themeRoot) return;
+    const vars = this._themesMod.resolveTheme(this.state.themeName, this.state.appearance, this._mq ? this._mq.matches : false);
+    Object.keys(vars).forEach((k) => this._themeRoot.style.setProperty('--t-' + k, vars[k]));
+  };
+  setTheme = (name) => { try { localStorage.setItem('rolls_theme', name); } catch (e) {} this.setState({ themeName: name }); setTimeout(this.applyTheme, 0); };
+  setAppearance = (a) => { try { localStorage.setItem('rolls_appearance', a); } catch (e) {} this.setState({ appearance: a }); setTimeout(this.applyTheme, 0); };
+  openThemeSheet = () => this.setState({ sheet: 'theme' });
+
+  // ---- end-of-roll / developing ----
+  onRollStatus = (status) => {
+    this.setState(s => {
+      const id = s.mobileRollId != null ? s.mobileRollId : s.selectedRollId;
+      return {
+        rolls: s.rolls.map(r => r.id === id ? { ...r, status, shot: (status === 'developing' || status === 'done') ? r.total : r.shot } : r),
+        mobileRollId: null, selectedRollId: null,
+      };
+    });
+    this.toastMsg(status === 'developing' ? 'Rewound — sent to developing' : 'Roll marked as done');
+  };
+  openScans = (r) => this.setState({ sheet: 'scans', scanRollId: r.id, scanThumbs: [] });
+  scanInputRef = (el) => { this._scanInput = el; };
+  addScansClick = () => { if (this._scanInput) this._scanInput.click(); };
+  onScanFiles = (e) => {
+    const files = Array.prototype.slice.call(e.target.files || []).slice(0, 60);
+    const rdRaw = (file) => new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(file); });
+    const rd = (file) => this.store ? this.store.downscale(file, 1600).catch(() => rdRaw(file)) : rdRaw(file);
+    Promise.all(files.map(rd)).then((urls) => this.setState(s => ({ scanThumbs: s.scanThumbs.concat(urls.filter(Boolean)) })));
+    e.target.value = '';
+  };
+  scanPD = (e) => {
+    const idx = Number(e.currentTarget.getAttribute('data-scan-idx'));
+    if (!this.state.scanThumbs[idx]) return;
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    this.setState({ scanDrag: { idx, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, over: null, moved: false } });
+  };
+  scanPM = (e) => {
+    const d = this.state.scanDrag; if (!d) return;
+    e.stopPropagation(); if (e.cancelable) e.preventDefault();
+    let over = null, n = document.elementFromPoint(e.clientX, e.clientY);
+    while (n && n.getAttribute) {
+      const a = n.getAttribute('data-scan-idx');
+      if (a != null) { if (Number(a) !== d.idx) over = Number(a); break; }
+      if (n.getAttribute('data-scan-trash') != null) { over = 'trash'; break; }
+      n = n.parentElement;
+    }
+    const moved = d.moved || Math.abs(e.clientX - d.x0) > 5 || Math.abs(e.clientY - d.y0) > 5;
+    this.setState({ scanDrag: { ...d, x: e.clientX, y: e.clientY, over, moved } });
+  };
+  scanPU = () => {
+    const d = this.state.scanDrag; if (!d) return;
+    this.setState(s => {
+      const th = s.scanThumbs.slice();
+      if (d.moved && d.over === 'trash') th.splice(d.idx, 1);
+      else if (d.moved && typeof d.over === 'number' && th[d.idx]) {
+        const it = th.splice(d.idx, 1)[0];
+        th.splice(Math.min(d.over, th.length), 0, it);
+      }
+      return { scanThumbs: th, scanDrag: null };
+    });
+  };
+  matchScans = () => {
+    this.setState(s => {
+      const roll = s.rolls.find(r => r.id === s.scanRollId);
+      const ordered = s.scanThumbs.slice(0, roll ? roll.total : s.scanThumbs.length);
+      if (this.store && !this.demo && roll) {
+        // write scans straight into the library's frames
+        const fr = { ...(this.libFrames[String(roll.id)] || {}) };
+        const st = new Date(); const p = (n) => String(n).padStart(2, '0');
+        for (let i = 1; i <= roll.total; i++) {
+          if (!fr[i]) fr[i] = { ap:'f/5.6', sh:'1/250', iso:'400', focus:'2.5 m', lens:'50 mm', light:'', location:'', note:'', intended:'', scan:'', date: st.getFullYear() + '-' + p(st.getMonth() + 1) + '-' + p(st.getDate()), time: p(st.getHours()) + ':' + p(st.getMinutes()), stampAuto:true };
+          if (ordered[i - 1]) fr[i] = { ...fr[i], scan: ordered[i - 1] };
+        }
+        this.store.setFrames(String(roll.id), fr);
+        this.libFrames = this.store.get().frames;
+      }
+      return {
+        rolls: s.rolls.map(r => r.id === s.scanRollId ? { ...r, status: 'done', shot: r.total, scans: ordered } : r),
+        sheet: null,
+      };
+    });
+    this.toastMsg('Scans matched to frames — roll is done');
+  };
+
+  // ---- settings: default film / units / export / sign out ----
+  openDefaultFilm = () => this.setState({ sheet: 'defaultFilm' });
+  setDefaultFilm = (f) => {
+    try { localStorage.setItem('rolls_default_film', f); } catch (e) {}
+    this.setState({ defaultFilm: f, sheet: 'profile' });
+    this.toastMsg('Default film: ' + f);
+  };
+  toggleUnits = () => {
+    const u = this.state.units === 'Metric' ? 'Imperial' : 'Metric';
+    try { localStorage.setItem('rolls_units', u); } catch (e) {}
+    this.setState({ units: u });
+    this.toastMsg(u === 'Metric' ? 'Metric — metres & °C' : 'Imperial — feet & °F');
+  };
+  openExport = () => this.setState({ sheet: 'export' });
+  downloadText = (name, text, type) => {
+    const blob = new Blob([text], { type: type || 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 800);
+  };
+  stampName = () => { const d = new Date(); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()); };
+  doExport = (kind) => {
+    if (this.demo || !this.store) { this.setState({ sheet: 'profile' }); this.toastMsg('Export is available in the app'); return; }
+    if (kind === 'backup') { this.downloadText('rolls-backup-' + this.stampName() + '.json', this.store.exportJSON(true)); this.toastMsg('Backup saved — keep it somewhere safe'); }
+    else if (kind === 'data') { this.downloadText('rolls-library-' + this.stampName() + '.json', this.store.exportJSON(false)); this.toastMsg('Library data exported'); }
+    else if (kind === 'csv') {
+      const d = this.store.get();
+      const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const rows = [['Roll','Film','Camera','Format','Frame','Date','Time','Aperture','Shutter','ISO','Focus','Lens','Light','Location','Note','Has reference','Has scan']];
+      d.rolls.forEach((r) => { const fr = d.frames[String(r.id)] || {}; Object.keys(fr).map(Number).sort((a, b) => a - b).forEach((n) => { const f = fr[n]; rows.push([r.name, r.film, r.camera, r.format, n, f.date, f.time, f.ap, f.sh, f.iso, f.focus, f.lens, f.light, f.location, f.note, f.intended ? 'yes' : '', f.scan ? 'yes' : '']); }); });
+      this.downloadText('rolls-frames-' + this.stampName() + '.csv', rows.map((r) => r.map(esc).join(',')).join('\n'), 'text/csv');
+      this.toastMsg('Spreadsheet exported');
+    }
+    else if (kind === 'restore') { if (this._importInput) this._importInput.click(); return; }
+    this.setState({ sheet: 'profile' });
+  };
+  importInputRef = (el) => { this._importInput = el; };
+  onImportFile = (e) => {
+    const file = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!file || !this.store) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      this.store.importJSON(String(fr.result), 'replace').then((d) => {
+        this.rolls = d.rolls; this.libFrames = d.frames;
+        this.setState({ rolls: d.rolls, profile: { name:'', handle:'', avatar:'', ...d.profile }, profileDraft: { name:'', handle:'', avatar:'', ...d.profile }, defaultFilm: d.settings.defaultFilm, units: d.settings.units, themeName: d.settings.theme, appearance: d.settings.appearance, sheet: null, selectedRollId: null, mobileRollId: null }, () => this.applyTheme());
+        this.toastMsg('Library restored — ' + d.rolls.length + ' roll' + (d.rolls.length === 1 ? '' : 's'));
+      }).catch(() => this.toastMsg('That file isn\u2019t a Rolls backup'));
+    };
+    fr.readAsText(file);
+  };
+  askSignOut = () => this.setState({ sheet: 'signOut' });
+  doSignOut = () => { this.setState({ sheet: null }); this.toastMsg('Signed out'); };
+
+  // ---- shelf sorting + swipe-to-delete ----
+  sortBy = (key) => this.setState(s => {
+    if (s.sortKey === key) return { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' };
+    return { sortKey: key, sortDir: 'asc' };
+  });
+  deleteRoll = (r) => this.setState({ confirmDelete: r, swipedRollId: null });
+  cancelDelete = () => this.setState({ confirmDelete: null });
+  confirmDeleteRoll = () => {
+    const r = this.state.confirmDelete;
+    if (!r) return;
+    if (this.store && !this.demo) { this.store.deleteRoll(String(r.id)); this.libFrames = this.store.get().frames; }
+    this.setState(s => ({
+      rolls: s.rolls.filter(x => x.id !== r.id),
+      confirmDelete: null,
+      selectedRollId: s.selectedRollId === r.id ? null : s.selectedRollId,
+    }));
+    this.toastMsg('Deleted "' + r.name + '"');
+  };
+  rowPD = (e) => { this._rx = e.clientX; this._rdx = 0; };
+  rowPM = (id) => (e) => {
+    if (this._rx == null) return;
+    this._rdx = e.clientX - this._rx;
+    if (this._rdx > 8) e.stopPropagation();
+    if (this._rdx > 48 && this.state.swipedRollId !== id) this.setState({ swipedRollId: id });
+    else if (this._rdx < -12 && this.state.swipedRollId === id) this.setState({ swipedRollId: null });
+  };
+  rowPU = () => { this._rx = null; };
+  goHome = () => this.setState({ view:'home', dragPx:0, dragging:false });
+  goCosmos = () => this.setState({ view:'cosmos', dragPx:0, dragging:false });
+  calScrollRef = (el) => { if (el) this._calRefEl = el; };
+  // ---- library (store.js) ----
+  initLib = () => {
+    if (this.demo) return;
+    import('./store.js').then((m) => {
+      this.store = m.store;
+      return m.store.load();
+    }).then((d) => {
+      if (!d) return;
+      this.rolls = d.rolls; this.libFrames = d.frames;
+      const patch = {
+        rolls: d.rolls, libReady: true,
+        profile: { name:'', handle:'', avatar:'', ...d.profile }, profileDraft: { name:'', handle:'', avatar:'', ...d.profile },
+        defaultFilm: d.settings.defaultFilm, units: d.settings.units,
+      };
+      if (!this.props.theme0) patch.themeName = d.settings.theme;
+      if (!this.props.appearance0) patch.appearance = d.settings.appearance;
+      this.setState(patch, () => { this.applyTheme(); this.geoPhotos = this.geoFromFrames(); });
+      this._unsub = m.store.subscribe((nd) => { this.libFrames = nd.frames; });
+    }).catch(() => { this.setState({ libReady: true }); });
+  };
+  // frames edited in the logging screen → library
+  onFramesChange = (rollId) => (payload) => {
+    if (this.demo || !this.store || !payload) return;
+    this.store.setFrames(String(rollId), payload.frames);
+    this.libFrames = this.store.get().frames;
+    this.setState(s => ({ rolls: s.rolls.map(r => r.id === rollId ? { ...r, shot: Math.max(r.shot || 0, payload.maxFrame || 0), ...(payload.roll && payload.roll.name ? { name: payload.roll.name, film: payload.roll.film || r.film, camera: payload.roll.camera || r.camera } : {}) } : r) }));
+  };
+  framesFor(rollId) { return (rollId != null && this.libFrames[String(rollId)]) || null; }
+  // map/globe pins from frames that carry coordinates
+  geoFromFrames() {
+    const out = [];
+    this.state.rolls.forEach(r => {
+      const fr = this.libFrames[String(r.id)] || {};
+      Object.keys(fr).forEach(n => {
+        const f = fr[n];
+        if (typeof f.lat === 'number' && typeof f.lng === 'number') out.push({ lat:f.lat, lng:f.lng, count:1, tone:0, img:f.scan || f.intended || '', roll:r.name, rollId:r.id, frame:Number(n), label:f.location || r.name });
+      });
+    });
+    return out;
+  }
+  componentDidUpdate() {
+    if (this.demo || !this.store || !this.state.libReady) return;
+    const s = this.state, p = this._persisted || {};
+    if (p.rolls !== s.rolls) this.store.setRolls(s.rolls);
+    if (p.profile !== s.profile) this.store.setProfile(s.profile);
+    if (p.defaultFilm !== s.defaultFilm) this.store.setSetting('defaultFilm', s.defaultFilm);
+    if (p.units !== s.units) this.store.setSetting('units', s.units);
+    if (p.themeName !== s.themeName) this.store.setSetting('theme', s.themeName);
+    if (p.appearance !== s.appearance) this.store.setSetting('appearance', s.appearance);
+    this._persisted = { rolls: s.rolls, profile: s.profile, defaultFilm: s.defaultFilm, units: s.units, themeName: s.themeName, appearance: s.appearance };
+  }
+  componentDidMount() {
+    this.initLib();
+    let n = 0;
+    const tick = () => {
+      document.querySelectorAll('.rolls-scroll').forEach((node) => {
+        if (node.dataset.calScrolled) return;
+        if (/FRAME DAYS/.test(node.textContent) && node.scrollHeight > node.clientHeight + 20) {
+          const june = node.children && node.children[1];
+          if (june && june.offsetTop > 0) { node.scrollTop = june.offsetTop - 4; node.dataset.calScrolled = '1'; }
+        }
+      });
+      if (++n < 10) setTimeout(tick, 130);
+    };
+    setTimeout(tick, 150);
+    this.initTheme();
+    this._cosmosTimer = setInterval(() => {
+      this.ensureCosmos();
+      if (this._map && this._globe) { clearInterval(this._cosmosTimer); this._cosmosTimer = null; }
+    }, 450);
+  }
+  tapDay = (key, roll, frame) => {
+    if (this.state.calSel === key) { this.openFrameAt(roll, frame); }
+    else { this.setState({ calSel: key }); }
+  };
+  // open the frame-logging view at a specific roll + frame
+  openFrameAt = (rollName, frame) => {
+    const r = (typeof rollName === 'number' ? this.state.rolls.find(x => x.id === rollName) : null) || this.state.rolls.find(x => x.name === rollName) || this.state.rolls[0];
+    if (!r) { this.toastMsg('Roll not found'); return; }
+    if ((this.props.mode || 'mobile') === 'desktop') {
+      this.setState({ view:'home', dragPx:0, dragging:false, photoOpen:null, selectedRollId:r.id, jumpFrame:frame });
+    } else {
+      this.toastMsg('Opening ' + r.name + ' · frame ' + frame);
+    }
+  };
+  openNewRoll = () => this.setState(s => ({ sheet:'newRoll', draft:{ ...s.draft, film: s.draft.film || s.defaultFilm } }));
+  openProfile = () => this.setState({ sheet:'profile' });
+  openEditProfile = () => this.setState(s => ({ sheet:'editProfile', profileDraft:{ ...s.profile } }));
+  backToProfile = () => this.setState({ sheet:'profile' });
+  onProfileName = (e) => { const v = e.target.value; this.setState(s => ({ profileDraft:{ ...s.profileDraft, name:v } })); };
+  onProfileHandle = (e) => { const v = e.target.value.replace(/[^a-zA-Z0-9_.]/g, '').toLowerCase(); this.setState(s => ({ profileDraft:{ ...s.profileDraft, handle:v } })); };
+  saveProfile = () => { this.setState(s => ({ profile:{ ...s.profileDraft, name:(s.profileDraft.name||'').trim() || s.profile.name }, sheet:'profile' })); this.toastMsg('Profile updated'); };
+  avatarStyle = (av, sz, fs) => 'flex:none; width:' + sz + 'px; height:' + sz + 'px; border-radius:50%; overflow:hidden; background:' + (av ? ('center/cover no-repeat url("' + av + '")') : '#C79A55') + '; color:#2A2218; display:flex; align-items:center; justify-content:center; font-family:\'Hanken Grotesk\'; font-weight:700; font-size:' + fs + 'px;';
+  avatarInputRef = React.createRef();
+  onChangePhoto = () => { const el = this.avatarInputRef.current; if (el) el.click(); };
+  onAvatarFile = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => this.setState(s => ({ profileDraft:{ ...s.profileDraft, avatar: rd.result } }));
+    rd.readAsDataURL(f);
+    e.target.value = '';
+  };
+  closeSheets = () => this.setState({ sheet:null });
+  openRoll = (r) => this.setState({ mobileRollId: r.id, jumpFrame: null });
+  closeMobileRoll = () => this.setState({ mobileRollId: null });
+  selectRoll = (r) => this.setState({ selectedRollId: r.id, jumpFrame: null });
+  deselectRoll = () => this.setState({ selectedRollId: null });
+
+  // ---- horizontal swipe paging ----
+  onDown = (e) => { this._sx = e.clientX; this._sy = e.clientY; this._w = e.currentTarget.offsetWidth; this._axis = null; };
+  onMove = (e) => {
+    if (this._sx == null) return;
+    const dx = e.clientX - this._sx, dy = e.clientY - this._sy;
+    if (!this._axis) {
+      if (Math.abs(dx) > 26 || Math.abs(dy) > 12) {
+        this._axis = (Math.abs(dx) > Math.abs(dy) * 1.6 && Math.abs(dx) > 26) ? 'x' : 'y';
+        if (this._axis === 'x') { try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {} this.setState({ dragging:true }); }
+      }
+    }
+    if (this._axis === 'x') {
+      const page = this.state.view === 'cosmos' ? 1 : 0;
+      let d = dx;
+      if (page === 0) d = Math.max(-this._w, Math.min(0, d));
+      else d = Math.max(0, Math.min(this._w, d));
+      this.setState({ dragPx:d });
+    }
+  };
+  onUp = (e) => {
+    if (this._axis === 'x') {
+      const page = this.state.view === 'cosmos' ? 1 : 0;
+      const d = this.state.dragPx, th = this._w * 0.32;
+      let view = this.state.view;
+      if (page === 0 && d <= -th) view = 'cosmos';
+      else if (page === 1 && d >= th) view = 'home';
+      this.setState({ view, dragPx:0, dragging:false });
+    }
+    this._sx = null; this._sy = null; this._axis = null;
+  };
+
+  // ---- zoom slider ----
+  setDays = () => this.setState({ zoom:10 });
+  setRegion = () => this.setState({ zoom:52 });
+  setGlobe = () => this.setState({ zoom:90 });
+  onZoomDown = (e) => { this._zt = e.currentTarget; this._zoomDrag = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {} this.zoomFromY(e); };
+  onZoomMove = (e) => { if (this._zoomDrag) this.zoomFromY(e); };
+  onZoomUp = () => { this._zoomDrag = false; };
+  zoomFromY = (e) => {
+    const r = this._zt.getBoundingClientRect();
+    const ratio = (e.clientY - r.top) / r.height;
+    const z = Math.max(0, Math.min(100, (1 - ratio) * 100));
+    this.setState({ zoom:z });
+  };
+
+  // ---- geo photos : real map (Leaflet) + real globe (three.js) ----
+  tonesList = [
+    'radial-gradient(circle at 30% 24%, rgba(255,240,212,0.32), transparent 55%), linear-gradient(140deg,#c9a064,#7a5333)',
+    'radial-gradient(circle at 32% 22%, rgba(235,247,228,0.24), transparent 55%), linear-gradient(140deg,#88a06f,#3d4f33)',
+    'radial-gradient(circle at 30% 26%, rgba(245,236,220,0.26), transparent 55%), linear-gradient(140deg,#9a8a72,#4f463a)',
+    'radial-gradient(circle at 30% 24%, rgba(255,235,205,0.32), transparent 55%), linear-gradient(140deg,#d8a25a,#8a5326)',
+    'radial-gradient(circle at 32% 24%, rgba(255,232,222,0.30), transparent 55%), linear-gradient(140deg,#c98f6e,#6e4636)',
+    'radial-gradient(circle at 30% 22%, rgba(238,230,214,0.22), transparent 55%), linear-gradient(140deg,#857a6b,#3a352e)',
+    'radial-gradient(circle at 32% 24%, rgba(228,246,236,0.24), transparent 55%), linear-gradient(140deg,#6fa597,#2f504a)',
+    'radial-gradient(circle at 30% 24%, rgba(255,228,228,0.26), transparent 55%), linear-gradient(140deg,#c08585,#6e3f44)',
+  ];
+  get geoPhotos() { return this.demo ? this.demoGeo : (this._geo || []); }
+  set geoPhotos(v) { this._geo = v; }
+  demoGeo = [
+    { lat:51.5265, lng:-0.0824, count:14, tone:0, roll:'Summer', frame:9, label:'Shoreditch' },
+    { lat:51.5128, lng:-0.1300, count:6,  tone:3, roll:'Night Walks', frame:5, label:'Soho' },
+    { lat:51.4545, lng:-2.5879, count:4,  tone:6, roll:'Coastline', frame:3, label:'Bristol' },
+    { lat:48.8566, lng:2.3522,  count:9,  tone:4, roll:'Spring Trip', frame:5, label:'Paris' },
+    { lat:41.3874, lng:2.1686,  count:5,  tone:1, roll:'Studio', frame:2, label:'Barcelona' },
+  ];
+  openPhoto = (p) => this.setState({ photoOpen: p });
+  closePhoto = () => this.setState({ photoOpen: null });
+  goToFrame = () => { const p = this.state.photoOpen; this.setState({ photoOpen: null }); if (p) this.openFrameAt(p.roll, p.frame); };
+  flyToMap = (p) => {
+    this.setState({ zoom: 52, photoOpen: null });
+    setTimeout(() => { if (this._map) this._map.flyTo([p.lat, p.lng], 12, { duration: 1.4 }); }, 80);
+  };
+
+  // ---- gesture navigation : pinch / wheel between calendar, map, globe ----
+  doWarp = () => {
+    clearTimeout(this._warpT);
+    this.setState({ warp: Date.now() });
+    this._warpT = setTimeout(() => this.setState({ warp: null }), 980);
+  };
+  toCal = () => this.setState({ zoom: 10 });
+  goMapBtn = () => this.toMapView();
+  goCalBtn = () => {
+    this.setState({ zoom: 10, calSel: null });
+    setTimeout(() => {
+      document.querySelectorAll('.rolls-scroll').forEach((node) => {
+        if (/FRAME DAYS/.test(node.textContent) && node.scrollHeight > node.clientHeight + 20) {
+          const june = node.children && node.children[1];
+          if (june && june.offsetTop > 0) node.scrollTop = june.offsetTop - 4;
+        }
+      });
+    }, 380);
+  };
+  toGlobe = () => { this.doWarp(); this.setState({ zoom: 92 }); };
+  toMapView = (opts) => {
+    if (this.state.zoom >= 72) this.doWarp();
+    this.setState({ zoom: 52, photoOpen: null });
+    setTimeout(() => {
+      if (!this._map) return;
+      try { this._map.setView((opts && opts.center) || [51.5205, -0.09], (opts && opts.z != null) ? opts.z : 15, { animate: false }); } catch (e) {}
+    }, 80);
+  };
+  _pinchPts = {};
+  _pinchStart = null;
+  onCalPD = (e) => {
+    this._pinchPts[e.pointerId] = [e.clientX, e.clientY];
+    const ids = Object.keys(this._pinchPts);
+    if (ids.length === 2) { const a = this._pinchPts[ids[0]], b = this._pinchPts[ids[1]]; this._pinchStart = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+  };
+  onCalPM = (e) => {
+    if (!(e.pointerId in this._pinchPts)) return;
+    this._pinchPts[e.pointerId] = [e.clientX, e.clientY];
+    const ids = Object.keys(this._pinchPts);
+    if (ids.length === 2 && this._pinchStart) {
+      const a = this._pinchPts[ids[0]], b = this._pinchPts[ids[1]];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (d / this._pinchStart < 0.74) { this._pinchPts = {}; this._pinchStart = null; this.toMapView(); }
+    }
+  };
+  onCalPU = (e) => { delete this._pinchPts[e.pointerId]; this._pinchStart = null; };
+  onCalWheel = (e) => {
+    if (!e.ctrlKey) return; // trackpad pinch arrives as ctrl+wheel; plain wheel scrolls the months
+    e.preventDefault();
+    this._calWheelAcc = (this._calWheelAcc || 0) + e.deltaY;
+    clearTimeout(this._calWheelT);
+    this._calWheelT = setTimeout(() => { this._calWheelAcc = 0; }, 350);
+    if (this._calWheelAcc > 60) { this._calWheelAcc = 0; this.toMapView(); }
+  };
+  mapElRef = (el) => { if (el) { this._mapEl = el; this.ensureCosmos(); } };
+  globeElRef = (el) => { if (el) { this._globeEl = el; this.ensureCosmos(); } };
+  ensureCosmos = () => { this.ensureMap(); this.ensureGlobe(); };
+
+  ensureMap = () => {
+    if (this._map || !this._mapEl || !window.L) return;
+    if (this._mapEl.clientWidth < 40 || this._mapEl.dataset.mapInit) return;
+    this._mapEl.dataset.mapInit = '1';
+    const L = window.L;
+    const map = L.map(this._mapEl, { zoomControl:false, attributionControl:false, worldCopyJump:true, minZoom:3 });
+    map.setView([51.517, -0.09], 12);
+    map.on('zoomend', () => {
+      if (this.state.zoom !== 52) return;
+      const mz = map.getZoom();
+      if (mz <= 4) this.toGlobe();
+      else if (mz >= 17) this.toCal();
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:19 }).addTo(map);
+    this.geoPhotos.forEach((p) => {
+      const html = '<div class="rolls-photo-pin"><div class="pp-card" style="background:' + this.tonesList[p.tone % this.tonesList.length] + '"></div><div class="pp-tail"></div><div class="pp-count">' + p.count + '</div></div>';
+      const icon = L.divIcon({ html: html, className: '', iconSize: [54, 64], iconAnchor: [27, 63] });
+      L.marker([p.lat, p.lng], { icon: icon }).addTo(map).on('click', () => this.openPhoto(p));
+    });
+    this._mapEl.addEventListener('pointerdown', (e) => e.stopPropagation());
+    this._map = map;
+    this._mapRO = new ResizeObserver(() => { try { map.invalidateSize(); } catch (e) {} });
+    this._mapRO.observe(this._mapEl);
+  };
+
+  ensureGlobe = () => {
+    if (this._globe || !this._globeEl || !window.THREE) return;
+    const el = this._globeEl;
+    const w = el.clientWidth, h = el.clientHeight;
+    if (w < 40 || h < 40 || el.dataset.globeInit) return;
+    el.dataset.globeInit = '1';
+    const THREE = window.THREE;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(w, h);
+    renderer.domElement.style.cssText = 'position:absolute; left:0; top:0; width:100%; height:100%;';
+    el.appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
+    const fitCam = (cw, ch) => {
+      camera.aspect = cw / ch;
+      const vHalf = camera.fov / 2 * Math.PI / 180;
+      const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+      camera.position.set(0, 0, 1.22 / Math.sin(Math.min(vHalf, hHalf)));
+      camera.updateProjectionMatrix();
+    };
+    fitCam(w, h);
+    scene.add(new THREE.AmbientLight(0x93a4c8, 0.85));
+    const sun = new THREE.DirectionalLight(0xfff2dc, 1.1); sun.position.set(-2, 1.4, 2.6); scene.add(sun);
+    const group = new THREE.Group(); scene.add(group);
+    group.rotation.y = -Math.PI / 2; // Europe facing camera
+    group.rotation.x = 0.52;         // tilt north hemisphere toward viewer
+    const mat = new THREE.MeshPhongMaterial({ color: 0x16233f, shininess: 6 });
+    new THREE.TextureLoader().load('https://unpkg.com/three-globe@2.31.0/example/img/earth-blue-marble.jpg', (tex) => { mat.map = tex; mat.color.setHex(0xffffff); mat.needsUpdate = true; });
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), mat));
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(1.04, 64, 64), new THREE.MeshBasicMaterial({ color: 0x5f86d8, transparent: true, opacity: 0.10, side: THREE.BackSide })));
+    const markers = this.geoPhotos.map((p) => {
+      const d = document.createElement('div');
+      d.className = 'rolls-photo-pin';
+      d.style.cssText = 'position:absolute; left:0; top:0; z-index:6; display:none;';
+      d.innerHTML = '<div class="pp-card" style="width:44px;height:44px;background:' + this.tonesList[p.tone % this.tonesList.length] + '"></div><div class="pp-tail"></div><div class="pp-count">' + p.count + '</div>';
+      d.addEventListener('click', () => this.flyToMap(p));
+      d.addEventListener('pointerdown', (e) => e.stopPropagation());
+      el.appendChild(d);
+      const phi = (90 - p.lat) * Math.PI / 180, theta = (p.lng + 180) * Math.PI / 180;
+      return { el: d, pos: new THREE.Vector3(-Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta)) };
+    });
+    let dragging = false, lx = 0, ly = 0;
+    const gPts = {}; let gPinch0 = null;
+    const dom = renderer.domElement;
+    dom.addEventListener('pointerdown', (e) => {
+      gPts[e.pointerId] = [e.clientX, e.clientY];
+      const ids = Object.keys(gPts);
+      if (ids.length === 2) { const a = gPts[ids[0]], b = gPts[ids[1]]; gPinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); dragging = false; }
+      else { dragging = true; lx = e.clientX; ly = e.clientY; }
+      try { dom.setPointerCapture(e.pointerId); } catch (err) {}
+      e.stopPropagation(); el.style.cursor = 'grabbing';
+    });
+    dom.addEventListener('pointermove', (e) => {
+      if (e.pointerId in gPts) gPts[e.pointerId] = [e.clientX, e.clientY];
+      const ids = Object.keys(gPts);
+      if (ids.length === 2 && gPinch0) {
+        const a = gPts[ids[0]], b = gPts[ids[1]];
+        const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        if (d / gPinch0 > 1.28) { ids.forEach((i) => delete gPts[i]); gPinch0 = null; this.toMapView({ z: 5, center: [48.5, 2] }); }
+        e.stopPropagation(); return;
+      }
+      if (!dragging) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+      group.rotation.y += dx * 0.005;
+      group.rotation.x = Math.max(-0.9, Math.min(0.9, group.rotation.x + dy * 0.003));
+      e.stopPropagation();
+    });
+    const endDrag = (e) => { if (e && e.pointerId != null) delete gPts[e.pointerId]; if (Object.keys(gPts).length < 2) gPinch0 = null; dragging = false; el.style.cursor = 'grab'; };
+    dom.addEventListener('pointerup', endDrag);
+    dom.addEventListener('pointercancel', endDrag);
+    dom.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      this._globeWheelAcc = (this._globeWheelAcc || 0) + e.deltaY;
+      clearTimeout(this._globeWheelT);
+      this._globeWheelT = setTimeout(() => { this._globeWheelAcc = 0; }, 350);
+      if (this._globeWheelAcc < -60) { this._globeWheelAcc = 0; this.toMapView({ z: 5, center: [48.5, 2] }); }
+    }, { passive: false });
+    const tmp = new THREE.Vector3();
+    const animate = () => {
+      this._globeRAF = requestAnimationFrame(animate);
+      if (!dragging) group.rotation.y += 0.00035;
+      const cw = el.clientWidth, ch = el.clientHeight;
+      markers.forEach((m) => {
+        tmp.copy(m.pos).applyEuler(group.rotation);
+        if (tmp.z > 0.2) {
+          const sp = tmp.clone().project(camera);
+          m.el.style.display = 'block';
+          m.el.style.transform = 'translate(' + ((sp.x * 0.5 + 0.5) * cw).toFixed(1) + 'px,' + ((-sp.y * 0.5 + 0.5) * ch).toFixed(1) + 'px) translate(-50%,-100%)';
+        } else { m.el.style.display = 'none'; }
+      });
+      renderer.render(scene, camera);
+    };
+    animate();
+    this._globeRO = new ResizeObserver(() => {
+      const nw = el.clientWidth, nh = el.clientHeight;
+      if (nw > 0 && nh > 0) { renderer.setSize(nw, nh); fitCam(nw, nh); }
+    });
+    this._globeRO.observe(el);
+    this._globe = { renderer: renderer, scene: scene, camera: camera, group: group };
+  };
+
+  componentWillUnmount() {
+    if (this._unsub) this._unsub();
+    if (this._globeRAF) cancelAnimationFrame(this._globeRAF);
+    if (this._cosmosTimer) clearInterval(this._cosmosTimer);
+    if (this._map) { try { this._map.remove(); } catch (e) {} }
+  }
+
+  // ---- new roll ----
+  onName = (e) => this.setDraft('name', e.target.value);
+  onFilm = (e) => this.setDraft('film', e.target.value);
+  onCamera = (e) => this.setDraft('camera', e.target.value);
+  onCustomCount = (e) => this.setDraft('customCount', e.target.value.replace(/[^0-9]/g, ''));
+  onStartFrame = (e) => this.setDraft('startFrame', e.target.value.replace(/[^0-9]/g, ''));
+  setDraft = (k, v) => { if (this._cdMoved) { this._cdMoved = false; return; } this.setState(s => ({ draft: { ...s.draft, [k]:v } })); };
+
+  // ---- chip rows: mouse-drag + wheel horizontal scroll ----
+  chipPD = (e) => { if (e.pointerType !== 'mouse') return; this._cd = { x: e.clientX, sl: e.currentTarget.scrollLeft, pid: e.pointerId }; this._cdMoved = false; };
+  chipPM = (e) => { if (!this._cd) return; const dx = e.clientX - this._cd.x; if (Math.abs(dx) > 6 && !this._cdMoved) { this._cdMoved = true; try { e.currentTarget.setPointerCapture(this._cd.pid); } catch (err) {} } if (this._cdMoved) e.currentTarget.scrollLeft = this._cd.sl - dx; };
+  chipPU = () => { this._cd = null; setTimeout(() => { this._cdMoved = false; }, 80); };
+  chipWheel = (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) e.currentTarget.scrollLeft += e.deltaY; };
+  loadRoll = () => {
+    const d = this.state.draft;
+    const total = d.count === 'custom' ? (Number(d.customCount) || 36) : Number(d.count);
+    let startFrame = 1, shot = 0;
+    if (d.startMode === 'custom') {
+      startFrame = Math.max(1, Math.min(total, Number(d.startFrame) || 1));
+      shot = startFrame - 1;
+    }
+    const roll = { id: Date.now(), name: (d.name || '').trim() || 'Untitled roll', film: (d.film || '').trim() || 'Kodak Portra 400', camera: (d.camera || '').trim() || '35mm camera', format: d.format, total, shot, status:'active', date:'Now' };
+    const isDesktop = (this.props.mode || 'mobile') === 'desktop';
+    this.setState(s => ({
+      rolls:[roll, ...s.rolls], sheet:null, rollAnim:{ color: this.pal(roll.film).accent },
+      selectedRollId: isDesktop ? roll.id : s.selectedRollId,
+      mobileRollId: isDesktop ? s.mobileRollId : roll.id,
+      jumpFrame: startFrame,
+      draft:{ name:'', film:'', camera:'', count:'36', customCount:'', format:'35mm', startMode:'new', startFrame:'' }
+    }));
+    clearTimeout(this._rollAnimT);
+    this._rollAnimT = setTimeout(() => { this.setState({ rollAnim: null }); }, 1250);
+  };
+
+  // Real library → calendar months. photos[day] = { img, rollId, frame }; rolls[] = roll starts.
+  monthsFromLibrary() {
+    const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const byKey = {};
+    const month = (y, m) => {
+      const key = y + '-' + String(m).padStart(2, '0');
+      if (!byKey[key]) byKey[key] = { key, name: MN[m - 1] + ' ' + y, dim: new Date(y, m, 0).getDate(), off: new Date(y, m - 1, 1).getDay(), photos: {}, rolls: [], real: true };
+      return byKey[key];
+    };
+    const now = new Date(); month(now.getFullYear(), now.getMonth() + 1);
+    this.state.rolls.forEach(r => {
+      const ts = String(r.ts || '');
+      if (ts.length === 8) month(Number(ts.slice(0, 4)), Number(ts.slice(4, 6))).rolls.push({ day: Number(ts.slice(6, 8)), name: r.name, film: r.film, col: this.pal(r.film).accent, id: r.id });
+      const fr = this.libFrames[String(r.id)] || {};
+      Object.keys(fr).forEach(n => {
+        const f = fr[n]; const p = (f.date || '').split('-');
+        if (p.length !== 3) return;
+        const m = month(Number(p[0]), Number(p[1]));
+        const img = f.scan || f.intended || '';
+        const day = Number(p[2]);
+        if (!m.photos[day] || (img && !m.photos[day].img)) m.photos[day] = { img, rollId: r.id, frame: Number(n), roll: r.name };
+      });
+    });
+    return Object.keys(byKey).sort().map(k => byKey[k]);
+  }
+
+  cells(roll, n, big) {
+    const filled = Math.round((roll.shot / roll.total) * n);
+    const p = this.pal(roll.film);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const on = i < filled;
+      out.push({ style: {
+        flex:'1 1 0', minWidth:'0', height: big ? '26px' : '16px', borderRadius:'2px',
+        background: on ? p.accent : 'rgba(var(--t-brgb,42,40,35),0.10)',
+        boxShadow: on ? ('inset 0 0 0 1px ' + p.deep) : 'inset 0 0 0 1px rgba(var(--t-brgb,42,40,35),0.08)',
+      } });
+    }
+    return out;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const mode = this.props.mode || 'mobile';
+    const variant = this.props.variant || 'C';
+    const isDesktop = mode === 'desktop';
+    const isMobile = !isDesktop;
+    const page = s.view === 'cosmos' ? 1 : 0;
+
+    const rolls = s.rolls;
+    const active = rolls.filter(r => r.status === 'active');
+    const done = rolls.filter(r => r.status === 'done');
+    const totalFrames = rolls.reduce((a, r) => a + r.shot, 0);
+
+    const mkRoll = (r, cellN, big) => {
+      const p = this.pal(r.film);
+      return {
+        name:r.name, film:r.film, camera:r.camera, cameraShort:r.camera, format:r.format,
+        shot:r.shot, total:r.total, remain:(r.total - r.shot), shotPad:String(r.shot).padStart(2,'0'),
+        date:r.date, strip:p.strip, accent:p.accent, accentDeep:p.deep,
+        cells:this.cells(r, cellN, big), onOpen:() => this.openRoll(r),
+      };
+    };
+
+    const activeRolls = active.map(r => mkRoll(r, isDesktop ? 18 : 16, true));
+    const doneRolls = done.map(r => mkRoll(r, isDesktop ? 12 : 8, false));
+
+    // variant B canisters
+    const canisters = rolls.map(r => {
+      const p = this.pal(r.film);
+      return {
+        name:r.name, body:'linear-gradient(150deg,' + p.body + ',' + p.deep + ')', label:p.band, accent:p.accent,
+        brand:p.brandT, brandColor:p.brand, iso:r.film.replace(/^[A-Za-z]+\s*/, '') || r.film,
+        pct: Math.round((r.shot / r.total) * 100) + '%',
+        statusLabel: r.status === 'active' ? (r.shot + '/' + r.total) : (r.status === 'developing' ? 'DEV' : 'DONE'),
+        onOpen:() => this.openRoll(r),
+      };
+    });
+    const latestFrames = Array.from({ length:11 }).map((_, i) => {
+      const tones = ['#c98a3f','#b5733a','#6f8a5e','#3f6f8a','#8a5e6f','#a98b4a'];
+      return { style:{ flex:'none', width:'52px', height:'40px', borderRadius:'4px', background:'linear-gradient(160deg,' + tones[i % tones.length] + ',rgba(0,0,0,0.35))', boxShadow:'inset 0 0 0 1px rgba(0,0,0,0.2)' } };
+    });
+    const weekFrames = 19;
+
+    // ---- shelf sort ----
+    const dir = s.sortDir === 'asc' ? 1 : -1;
+    const sortedRolls = rolls.slice().sort((a, b) => {
+      if (s.sortKey === 'name') return a.name.localeCompare(b.name) * dir;
+      if (s.sortKey === 'state') { const rk = (st) => st === 'active' ? 0 : (st === 'developing' ? 1 : 2); return (rk(a.status) - rk(b.status)) * dir; }
+      return (a.ts - b.ts) * dir;
+    });
+    const arrow = (key) => s.sortKey === key ? (s.sortDir === 'asc' ? ' ▲' : ' ▼') : '';
+
+    // variant C ledger
+    const ledgerRows = sortedRolls.map((r, i) => {
+      const p = this.pal(r.film);
+      const swiped = s.swipedRollId === r.id;
+      const sel = isDesktop && r.id === s.selectedRollId;
+      return {
+        name:r.name, film:r.film, cameraShort:r.camera, shot:r.shot, total:r.total,
+        loaded: r.date,
+        state: r.status === 'active' ? 'Active' : (r.status === 'developing' ? 'Dev' : 'Done'),
+        stateColor: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.8)' : (r.status === 'done' ? 'var(--t-muted,#9A9280)' : '#B07F37'),
+        nameCol: sel ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-ink,#2A2823)',
+        subCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.6)' : 'var(--t-muted2,#8B8270)',
+        loadedCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.55)' : 'var(--t-muted2,#8B8270)',
+        frameCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.85)' : 'var(--t-ink2,#46423a)',
+        iconBody: r.status === 'active' ? 'var(--t-card2,#F4EFE3)' : '#E6DFCF',
+        iconBand: p.accent,
+        bg: sel ? 'var(--t-btn,#26241F)' : (i % 2 ? 'rgba(var(--t-brgb,42,40,35),0.05)' : 'transparent'),
+        rowShift: swiped ? 'translateX(86px)' : 'translateX(0)',
+        delVis: swiped ? 'visible' : 'hidden',
+        onOpen:() => {
+          if (Math.abs(this._rdx || 0) > 10) return;
+          if (s.swipedRollId) { this.setState({ swipedRollId: null }); return; }
+          if (r.status === 'developing') { this.openScans(r); return; }
+          if (isDesktop) this.selectRoll(r); else this.openRoll(r);
+        },
+        onDelete:() => this.deleteRoll(r),
+        onPD: this.rowPD, onPM: this.rowPM(r.id), onPU: this.rowPU,
+      };
+    });
+    const sortRoll = () => this.sortBy('name');
+    const sortLoaded = () => this.sortBy('date');
+    const sortState = () => this.sortBy('state');
+    const rollArrow = arrow('name'), loadedArrow = arrow('date'), stateArrow = arrow('state');
+
+    // ---- desktop sidebar roll list (master) ----
+    const selRoll = rolls.find(r => r.id === s.selectedRollId) || null;
+    const mRoll = rolls.find(r => r.id === s.mobileRollId) || null;
+    const sideRowBase = { appearance:'none', cursor:'pointer', width:'100%', textAlign:'left', display:'flex', alignItems:'center', gap:'11px', border:'none', borderRadius:'10px', padding:'10px 11px' };
+    const sideRolls = sortedRolls.map(r => {
+      const p = this.pal(r.film);
+      const sel = r.id === s.selectedRollId;
+      return {
+        name:r.name, sub:r.film, frames:(r.shot + '/' + r.total),
+        loaded: r.date,
+        state: r.status === 'active' ? 'Active' : (r.status === 'developing' ? 'Dev' : 'Done'),
+        stateCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.8)' : (r.status === 'done' ? 'var(--t-muted,#9A9280)' : '#B07F37'),
+        loadedCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.55)' : 'var(--t-muted2,#8B8270)',
+        delVis: s.swipedRollId === r.id ? 'visible' : 'hidden',
+        onDelete: () => this.deleteRoll(r),
+        onPD: this.rowPD, onPM: this.rowPM(r.id), onPU: this.rowPU,
+        state: r.status === 'active' ? 'Active' : (r.status === 'developing' ? 'Dev' : 'Done'),
+        iconBody: sel ? '#EFE9DB' : (r.status === 'active' ? 'var(--t-card2,#F4EFE3)' : (r.status === 'developing' ? '#3A3936' : '#E6DFCF')),
+        iconBand: p.accent,
+        rowStyle: { ...sideRowBase, background: sel ? 'var(--t-btn,#26241F)' : 'var(--t-rail,#EBE5D7)', transform: s.swipedRollId === r.id ? 'translateX(74px)' : 'translateX(0)', transition: 'transform 0.22s cubic-bezier(0.22,1,0.36,1)', touchAction: 'pan-y' },
+        nameCol: sel ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-ink,#2A2823)',
+        subCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.62)' : 'var(--t-muted2,#8B8270)',
+        frameCol: sel ? 'rgba(var(--t-btnTextRgb,239,233,219),0.78)' : 'var(--t-muted4,#6E675B)',
+        onClick:() => {
+          if (Math.abs(this._rdx || 0) > 10) return;
+          if (s.swipedRollId) { this.setState({ swipedRollId: null }); return; }
+          if (r.status === 'developing') { this.openScans(r); return; }
+          this.selectRoll(r);
+        },
+      };
+    });
+
+    // ---- COSMOS — paper on stars ----
+    const z = s.zoom;
+    const cl = (v) => Math.max(0, Math.min(1, v));
+    const lerp = (a, b, t) => a + (b - a) * cl(t);
+    const calOp = cl((42 - z) / 16);
+    const calScale = lerp(1, 0.82, z / 42);
+    const mapLayerOp = Math.min(cl((z - 33) / 9), cl((76 - z) / 8));
+    const globeLayerOp = cl((z - 68) / 10);
+    const altTitle = z < 33 ? 'Days' : (z < 72 ? 'Places' : 'Earth');
+    const altSub = z < 33 ? 'Scroll months \u00b7 pinch out for the map' : (z < 72 ? 'Tap a photo stack \u00b7 zoom out for Earth' : 'Drag to spin \u00b7 tap a photo to fly in');
+
+    // film/paper photo tones
+    const tones = [
+      'radial-gradient(circle at 30% 24%, rgba(255,240,212,0.32), transparent 55%), linear-gradient(140deg,#c9a064,#7a5333)',
+      'radial-gradient(circle at 32% 22%, rgba(235,247,228,0.24), transparent 55%), linear-gradient(140deg,#88a06f,#3d4f33)',
+      'radial-gradient(circle at 30% 26%, rgba(245,236,220,0.26), transparent 55%), linear-gradient(140deg,#9a8a72,#4f463a)',
+      'radial-gradient(circle at 30% 24%, rgba(255,235,205,0.32), transparent 55%), linear-gradient(140deg,#d8a25a,#8a5326)',
+      'radial-gradient(circle at 32% 24%, rgba(255,232,222,0.30), transparent 55%), linear-gradient(140deg,#c98f6e,#6e4636)',
+      'radial-gradient(circle at 30% 22%, rgba(238,230,214,0.22), transparent 55%), linear-gradient(140deg,#857a6b,#3a352e)',
+      'radial-gradient(circle at 32% 24%, rgba(228,246,236,0.24), transparent 55%), linear-gradient(140deg,#6fa597,#2f504a)',
+      'radial-gradient(circle at 30% 24%, rgba(255,228,228,0.26), transparent 55%), linear-gradient(140deg,#c08585,#6e3f44)',
+    ];
+
+    const monthDefs = this.demo ? [
+      { key:'2026-05', name:'May 2026', dim:31, off:5,
+        photos:{ 9:1, 10:3, 15:6, 16:0, 23:2, 24:4, 25:7 },
+        rolls:[ {day:12,name:'Spring Trip',film:'Kodak Gold 200',col:'#A98A4A'}, {day:30,name:'City B&W',film:'Ilford HP5 Plus',col:'#5E8E84'} ] },
+      { key:'2026-06', name:'June 2026', dim:30, off:1,
+        photos:{ 2:0, 3:4, 4:6, 6:2, 7:1, 8:3, 11:5, 12:7, 13:0, 14:2, 17:6, 18:3, 19:1, 20:4, 21:5, 22:7, 23:2, 26:0, 27:6 },
+        rolls:[ {day:8,name:'Coastline',film:'Fujifilm Pro 400H',col:'#6FA597'}, {day:14,name:'Night Walks',film:'CineStill 800T',col:'#6E7E9E'}, {day:18,name:'Summer',film:'Kodak Portra 400',col:'#C79A55'}, {day:18,name:'Studio',film:'Fujifilm Velvia 50',col:'#C77A4A'} ] },
+      { key:'2026-07', name:'July 2026', dim:31, off:3,
+        photos:{ 2:4, 3:1, 8:6 }, carry:'Night Walks',
+        rolls:[] },
+    ] : this.monthsFromLibrary();
+    const wd = ['S','M','T','W','T','F','S'];
+    const monthFrames = monthDefs.length ? Object.keys(monthDefs[Math.min(1, monthDefs.length - 1)].photos).length : 0;
+
+    const months = monthDefs.map(m => {
+      const rollByDay = {}; m.rolls.forEach(r => { (rollByDay[r.day] = rollByDay[r.day] || []).push(r.col); });
+      const photoKeys = Object.keys(m.photos);
+      const days = [];
+      for (let i = 0; i < m.off; i++) days.push({ blank:true, day:'', hasPhoto:false, rollStart:false, showNum:false, cellStyle:'aspect-ratio:1/1; appearance:none; background:transparent; border:none; padding:0;', photoStyle:'', numStyle:'', onTap:()=>{} });
+      for (let dn = 1; dn <= m.dim; dn++) {
+        const hasPhoto = Object.prototype.hasOwnProperty.call(m.photos, dn);
+        const key = m.key + '-' + dn;
+        const isSel = s.calSel === key;
+        const rollCols = rollByDay[dn] || [];
+        let cell = 'position:relative; aspect-ratio:1/1; border-radius:9px; appearance:none; padding:0; box-sizing:border-box; cursor:' + (hasPhoto ? 'pointer' : 'default') + '; overflow:' + (isSel ? 'visible' : 'hidden') + ';';
+        cell += hasPhoto ? ' border:none; background:transparent;' : ' background:transparent; border:none;';
+        if (isSel) cell += ' outline:2px solid #6FD3C0; outline-offset:1px; border-radius:9px;';
+        const ph = m.photos[dn];
+        const realImg = m.real && ph && ph.img;
+        const bgTone = m.real ? (realImg ? ('center/cover no-repeat url(' + ph.img + ')') : tones[(dn + (ph ? ph.frame : 0)) % tones.length]) : tones[ph % tones.length];
+        const photoStyle = 'position:absolute; inset:0; border-radius:9px; background:' + (hasPhoto ? bgTone : 'transparent') + '; box-shadow:inset 0 -7px 13px rgba(0,0,0,0.34);';
+        const numStyle = hasPhoto
+          ? "position:absolute; left:4px; bottom:2px; z-index:2; font-family:'DM Mono',monospace; font-size:9px; color:rgba(255,255,255,0.92); text-shadow:0 1px 3px rgba(0,0,0,0.8);"
+          : "position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:0px;";
+        // empty-day faint dot (Locket style)
+        const emptyDot = !hasPhoto;
+        let rn = m.carry || null; m.rolls.forEach(r => { if (r.day <= dn) rn = r.name; });
+        const rollRec = rn ? this.rolls.find(x => x.name === rn) : null;
+        let frame = hasPhoto ? Math.min(photoKeys.indexOf(String(dn)) + 1, rollRec ? rollRec.shot : 99) : 0;
+        if (m.real && ph) { rn = ph.rollId; frame = ph.frame; }
+        const dur = (rollCols.length * 1.7).toFixed(1) + 's';
+        const rollDots = rollCols.map((c, i) => ({
+          style: 'position:absolute; top:4px; right:4px; z-index:4; width:7px; height:7px; border-radius:50%; background:' + c + '; color:' + c + '; '
+            + (rollCols.length > 1
+               ? ('animation:dotcycle ' + dur + ' ease-in-out infinite ' + (i * 1.7).toFixed(1) + 's, dotpulse 2.4s ease-in-out infinite;')
+               : ('animation:dotpulse 2.4s ease-in-out infinite;'))
+        }));
+        days.push({ blank:false, day:dn, hasPhoto, emptyDot, hasRoll:rollCols.length > 0, rollDots, showNum:hasPhoto, cellStyle:cell, photoStyle, numStyle,
+          onTap: hasPhoto ? (() => this.tapDay(key, rn || 'Roll', frame)) : (() => {}) });
+      }
+      const rolls = m.rolls.map(r => ({ name:r.name, band:r.col, meta:'Loaded ' + m.name.split(' ')[0] + ' ' + r.day + ' \u00b7 ' + r.film }));
+      return { key:m.key, name:m.name, frameDays:String(photoKeys.length), days, rolls, hasRolls:m.rolls.length > 0 };
+    });
+    const weekdayLabels = wd.map(l => ({ l }));
+
+    // selected-day info bar
+    let calSelInfo = null;
+    if (s.calSel) {
+      const mk = s.calSel.slice(0, 7); const dd = s.calSel.slice(8);
+      const md = monthDefs.find(m => m.key === mk);
+      if (md && Object.prototype.hasOwnProperty.call(md.photos, +dd)) {
+        let rn = md.carry || null; md.rolls.forEach(r => { if (r.day <= +dd) rn = r.name; });
+        const rollRec2 = rn ? this.rolls.find(x => x.name === rn) : null;
+        let fr = Math.min(Object.keys(md.photos).indexOf(dd) + 1, rollRec2 ? rollRec2.shot : 99);
+        if (md.real) { rn = md.photos[+dd].roll; fr = md.photos[+dd].frame; }
+        calSelInfo = { date: md.name.split(' ')[0] + ' ' + dd, roll: rn || 'Roll', frame: 'Frame ' + fr };
+      }
+    }
+
+    const thumbTop = (14 + (1 - z / 100) * (190 - 28)) + 'px';
+    const tabBase = "appearance:none; cursor:pointer; width:30px; height:30px; border-radius:9px; border:1px solid rgba(150,170,225,0.25); background:rgba(10,14,26,0.74); color:#C7D2EC; font-size:13px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);";
+    const tabOn = "appearance:none; cursor:pointer; width:30px; height:30px; border-radius:9px; border:1px solid rgba(111,211,192,0.75); background:rgba(88,150,140,0.32); color:#EAF7F2; font-size:13px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);";
+
+    // new roll chips
+    const chip = (label, sel, onClick) => ({ label, onClick, style: {
+      flex:'none', appearance:'none', cursor:'pointer', whiteSpace:'nowrap', padding:'9px 13px', borderRadius:'9px',
+      fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'13px', fontWeight:600,
+      background: sel ? 'var(--t-btn,#26241F)' : 'var(--t-chip,#EDE7D9)', color: sel ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-muted4,#6E675B)',
+      border: sel ? '1px solid var(--t-btn,#26241F)' : '1px solid rgba(var(--t-brgb,42,40,35),0.10)',
+    } });
+    const d = s.draft;
+    const filmChips = this.filmQuick.map(f => chip(f, d.film === f, () => this.setDraft('film', f)));
+    const cameraChips = this.cameraQuick.map(c => chip(c, d.camera === c, () => this.setDraft('camera', c)));
+    const countOpts = ['24','36','custom'].map(c => chip(c === 'custom' ? 'Custom' : c, d.count === c, () => this.setDraft('count', c)));
+    const formatOpts = ['35mm','120','110'].map(c => chip(c, d.format === c, () => this.setDraft('format', c)));
+    const startChip = (label, sel, onClick) => ({ label, onClick, style: {
+      flex:'1 1 0', appearance:'none', cursor:'pointer', whiteSpace:'nowrap', padding:'11px 8px', borderRadius:'10px', textAlign:'center',
+      fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'13px', fontWeight:600,
+      background: sel ? 'var(--t-btn,#26241F)' : 'var(--t-chip,#EDE7D9)', color: sel ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-muted4,#6E675B)',
+      border: sel ? '1px solid var(--t-btn,#26241F)' : '1px solid rgba(var(--t-brgb,42,40,35),0.10)',
+    } });
+    const startOpts = [
+      startChip('Fresh roll · frame 1', d.startMode !== 'custom', () => this.setDraft('startMode', 'new')),
+      startChip('Start from a frame', d.startMode === 'custom', () => this.setDraft('startMode', 'custom')),
+    ];
+
+    const settingsRows = [
+      { label:'Edit profile', value:'', hint:'›', color:'var(--t-ink,#2A2823)', onClick:this.openEditProfile },
+      { label:'Default film', value:s.defaultFilm.replace(/^(Kodak|Fujifilm|Ilford|CineStill) /, ''), hint:'›', color:'var(--t-ink,#2A2823)', onClick:this.openDefaultFilm },
+      { label:'Units', value:s.units, hint:'', color:'var(--t-ink,#2A2823)', onClick:this.toggleUnits },
+      { label:'Choose theme', value:s.themeName, hint:'›', color:'var(--t-ink,#2A2823)', onClick:this.openThemeSheet },
+      { label:'Export library', value:'', hint:'›', color:'var(--t-ink,#2A2823)', onClick:this.openExport },
+      { label:'Sign out', value:'', hint:'', color:'#A8452E', onClick:this.askSignOut },
+    ];
+    const defaultFilmRows = Object.keys(this.filmPalettes).map((f) => ({
+      name: f, band: this.filmPalettes[f].accent,
+      mark: f === s.defaultFilm ? '✓' : '',
+      onPick: () => this.setDefaultFilm(f),
+    }));
+    const exportRows = [
+      { name:'Full backup', sub:'Every roll, frame and photo in one file \u2014 restorable', onPick:() => this.doExport('backup') },
+      { name:'Library data only', sub:'Rolls and frame settings without images \u2014 small', onPick:() => this.doExport('data') },
+      { name:'Spreadsheet (CSV)', sub:'All frames with exposure data', onPick:() => this.doExport('csv') },
+      { name:'Restore from backup\u2026', sub:'Replaces this library with a Rolls backup file', onPick:() => this.doExport('restore') },
+    ];
+
+    const initials = (s.profile.name || '').trim() ? s.profile.name.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase() : '·';
+    const profileLabel = (s.profile.name || '').trim() || 'Set up your profile';
+
+    const devList = rolls.filter(r => r.status === 'developing');
+    const devRolls = devList.map(r => ({
+      name: r.name, film: r.film, date: r.date,
+      onScans: () => this.openScans(r),
+    }));
+    const scanRoll = rolls.find(r => r.id === s.scanRollId) || null;
+    const nScans = scanRoll ? Math.min(s.scanThumbs.length, scanRoll.total) : 0;
+    const sd = s.scanDrag;
+    const scanSlots = scanRoll ? Array.from({ length: scanRoll.total }).map((_, i) => {
+      const img = s.scanThumbs[i];
+      const base = img
+        ? { aspectRatio: '1', borderRadius: '6px', background: 'url(' + img + ') center/cover', cursor: 'grab', touchAction: 'none' }
+        : { aspectRatio: '1', borderRadius: '6px', border: '1.5px dashed rgba(var(--t-brgb,42,40,35),0.3)', boxSizing: 'border-box' };
+      if (sd && sd.moved) {
+        if (sd.idx === i) Object.assign(base, { transform: 'translate(' + (sd.x - sd.x0) + 'px,' + (sd.y - sd.y0) + 'px) scale(1.08)', zIndex: 5, position: 'relative', boxShadow: '0 8px 20px rgba(0,0,0,0.3)', opacity: 0.95, pointerEvents: 'none' });
+        else if (sd.over === i) Object.assign(base, { outline: '2px solid #B07F37', outlineOffset: '1px' });
+      }
+      return { idx: i, style: base };
+    }) : [];
+    const sdActive = !!(sd && sd.moved);
+    const sdTrash = sdActive && sd.over === 'trash';
+    const scanTrashStyle = { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '46px', borderRadius: '12px', boxSizing: 'border-box', border: '1.5px dashed ' + (sdTrash ? '#C8402E' : 'rgba(200,64,46,0.55)'), color: '#C8402E', background: sdTrash ? 'rgba(200,64,46,0.10)' : 'transparent', fontFamily: "'Hanken Grotesk',sans-serif", fontSize: '12px', fontWeight: 700, opacity: sdActive ? 1 : 0, transform: sdTrash ? 'scale(1.03)' : 'scale(1)', transition: 'opacity 0.2s ease, transform 0.15s ease, background 0.15s ease', marginBottom: '14px' };
+
+    const sheetStyle = isDesktop
+      ? { position:'absolute', zIndex:41, top:0, right:0, bottom:0, width:'400px', boxSizing:'border-box', background:'var(--t-panel,#F2ECE0)', borderRadius:'18px 0 0 18px', padding:'26px 24px', overflowY:'auto', boxShadow:'0 -10px 40px rgba(0,0,0,0.18)', animation:'sheetIn 0.26s cubic-bezier(0.22,1,0.36,1) both' }
+      : { position:'absolute', zIndex:41, left:0, right:0, bottom:0, maxHeight:'90%', boxSizing:'border-box', background:'var(--t-panel,#F2ECE0)', borderRadius:'22px 22px 0 0', padding:'20px 18px 26px', overflowY:'auto', boxShadow:'0 -10px 40px rgba(0,0,0,0.18)', animation:'sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) both' };
+    const toastStyle = { position:'absolute', left:'50%', bottom: isDesktop ? '34px' : '34px', transform:'translateX(-50%)', zIndex:60, background:'var(--t-btn,#26241F)', color:'var(--t-btnText,#EFE9DB)', padding:'11px 18px', borderRadius:'11px', fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'13px', fontWeight:600, boxShadow:'0 10px 26px rgba(0,0,0,0.28)', animation:'toastIn 0.24s ease both', whiteSpace:'nowrap' };
+
+    const navHomeStyle = { appearance:'none', cursor:'pointer', width:'100%', display:'flex', alignItems:'center', gap:'10px', textAlign:'left', borderRadius:'10px', padding:'11px 13px', marginBottom:'5px', fontFamily:"'Hanken Grotesk',sans-serif", fontSize:'14px', fontWeight:600, border:'none', background: page === 0 ? 'var(--t-btn,#26241F)' : 'transparent', color: page === 0 ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-muted4,#6E675B)' };
+    const navCosmosStyle = { ...navHomeStyle, marginBottom:'5px', background: page === 1 ? 'var(--t-btn,#26241F)' : 'transparent', color: page === 1 ? 'var(--t-btnText,#EFE9DB)' : 'var(--t-muted4,#6E675B)' };
+    const sideOuter = { flexGrow:0, flexShrink:0, flexBasis: selRoll ? '0px' : '384px', minWidth:'0px', overflow:'hidden', height:'100%' };
+    const sideInner = { width:'384px', height:'100%', background:'var(--t-rail,#EBE5D7)', borderRight:'1px solid rgba(var(--t-brgb,42,40,35),0.10)', display:'flex', flexDirection:'column', minHeight:0 };
+
+    return {
+      isDesktop, isMobile,
+      showA: isMobile && variant === 'A',
+      showB: isMobile && variant === 'B',
+      showC: isMobile && variant === 'C',
+
+      trackTransform: 'translateX(calc(' + (-page * 50) + '% + ' + s.dragPx + 'px))',
+      trackTransition: s.dragging ? 'none' : 'transform 0.42s cubic-bezier(0.22,1,0.36,1)',
+      onDown:this.onDown, onMove:this.onMove, onUp:this.onUp,
+
+      activeRolls, doneRolls, canisters, latestFrames, ledgerRows,
+      sortRoll, sortLoaded, sortState, rollArrow, loadedArrow, stateArrow,
+      activeCount:active.length, doneCount:done.length, rollCount:rolls.length, totalFrames, weekFrames,
+      hasRolls: rolls.length > 0, noRolls: rolls.length === 0,
+
+      goHome:this.goHome, goCosmos:this.goCosmos,
+      openNewRoll:this.openNewRoll, openProfile:this.openProfile,
+      navHomeStyle, navCosmosStyle, sideOuter, sideInner,
+
+      // desktop master/detail
+      sideRolls,
+      hasSelection: !!selRoll, noSelection: !selRoll,
+      deselectRoll: this.deselectRoll,
+      mobileRollOpen: !isDesktop && !!mRoll,
+      closeMobileRoll: this.closeMobileRoll,
+      mSelKey: mRoll ? String(mRoll.id) : '',
+      mSelName: mRoll ? mRoll.name : '',
+      mSelFilm: mRoll ? mRoll.film : '',
+      mSelCamera: mRoll ? mRoll.camera : '',
+      mSelFormat: mRoll ? mRoll.format : '35mm',
+      mSelTotal: mRoll ? String(mRoll.total) : '36',
+      mSelShot: mRoll ? String(mRoll.shot) : '0',
+      mSelFrame: s.jumpFrame != null ? String(s.jumpFrame) : '',
+      selKey: selRoll ? String(selRoll.id) : '',
+      selScans: selRoll && selRoll.scans ? selRoll.scans : null,
+      mSelScans: mRoll && mRoll.scans ? mRoll.scans : null,
+      isLive: !this.demo,
+      selFrames: selRoll ? this.framesFor(selRoll.id) : null,
+      mSelFrames: mRoll ? this.framesFor(mRoll.id) : null,
+      selFramesChange: selRoll ? this.onFramesChange(selRoll.id) : null,
+      mSelFramesChange: mRoll ? this.onFramesChange(mRoll.id) : null,
+      selFrame: s.jumpFrame != null ? String(s.jumpFrame) : '',
+      hasConfirmDelete: !!s.confirmDelete,
+      confirmDelName: s.confirmDelete ? s.confirmDelete.name : '',
+      confirmDelMeta: s.confirmDelete ? (s.confirmDelete.shot + ' logged frame' + (s.confirmDelete.shot === 1 ? '' : 's') + ' · ' + s.confirmDelete.film) : '',
+      cancelDelete: this.cancelDelete, confirmDeleteRoll: this.confirmDeleteRoll,
+      selName: selRoll ? selRoll.name : '',
+      selFilm: selRoll ? selRoll.film : '',
+      selCamera: selRoll ? selRoll.camera : '',
+      selFormat: selRoll ? selRoll.format : '35mm',
+      selTotal: selRoll ? String(selRoll.total) : '36',
+      selShot: selRoll ? String(selRoll.shot) : '0',
+
+      // cosmos layers
+      cosmosTop: isDesktop ? '18px' : '54px',
+      panelW: isDesktop ? '460px' : '320px',
+      calOp, mapLayerOp, globeLayerOp,
+      mapLayerT: z >= 72 ? 'scale(1.6)' : 'scale(1)',
+      globeLayerT: z >= 72 ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(-12deg)',
+      hasWarp: !!s.warp,
+      showGlobeBtn: z < 33,
+      showCalBtn: z >= 33,
+      goMapBtn: this.goMapBtn, goCalBtn: this.goCalBtn,
+      calTransform:'scale(' + calScale + ')',
+      calPE: z < 40 ? 'auto' : 'none',
+      mapPE: (z >= 40 && z < 72) ? 'auto' : 'none',
+      globePE: z >= 72 ? 'auto' : 'none',
+      mapElRef: this.mapElRef, globeElRef: this.globeElRef,
+      months, weekdayLabels, monthFrames,
+      calSelInfo, hasCalSel: !!calSelInfo,
+      hasPhotoOpen: !!s.photoOpen,
+      photoOpenTone: s.photoOpen ? this.tonesList[s.photoOpen.tone % this.tonesList.length] : '',
+      photoOpenLabel: s.photoOpen ? s.photoOpen.label : '',
+      photoOpenMeta: s.photoOpen ? (s.photoOpen.roll + ' \u00b7 Frame ' + s.photoOpen.frame + ' \u00b7 ' + s.photoOpen.count + ' photos') : '',
+      openPhoto: this.openPhoto, closePhoto: this.closePhoto, goToFrame: this.goToFrame,
+      altTitle, altSub,
+
+      onCalWheel: this.onCalWheel, onCalPD: this.onCalPD, onCalPM: this.onCalPM, onCalPU: this.onCalPU,
+      lblGlobe: z >= 68 ? '#EAF0FB' : '#5C6987',
+      lblRegion: (z >= 33 && z < 68) ? '#EAF0FB' : '#5C6987',
+      lblDays: z < 33 ? '#EAF0FB' : '#5C6987',
+      calScrollRef: this.calScrollRef,
+
+      // sheets
+      newRollOpen: s.sheet === 'newRoll',
+      rollAnimOn: !!s.rollAnim, rollAnimColor: s.rollAnim ? s.rollAnim.color : '#C79A55',
+      profileOpen: s.sheet === 'profile',
+      editProfileOpen: s.sheet === 'editProfile',
+      themeOpen: s.sheet === 'theme',
+      defaultFilmOpen: s.sheet === 'defaultFilm',
+      exportOpen: s.sheet === 'export',
+      signOutOpen: s.sheet === 'signOut',
+      defaultFilmRows, exportRows, importInputRef: this.importInputRef, onImportFile: this.onImportFile,
+      doSignOut: this.doSignOut,
+      themeName: s.themeName, appearance: s.appearance,
+      themeRootRef: this.themeRootRef,
+      themeRows: (this._themesMod ? this._themesMod.THEME_ORDER.map((n) => ({
+        name: n, desc: this._themesMod.THEMES[n].desc,
+        swatches: this._themesMod.THEMES[n].swatches.map((c) => ({ c })),
+        mark: n === s.themeName ? '✓' : '',
+        border: n === s.themeName ? '1.5px solid var(--t-ink,#2A2823)' : '1px solid rgba(var(--t-brgb,42,40,35),0.14)',
+        onPick: () => this.setTheme(n),
+      })) : []),
+      appearanceOpts: ['system','light','dark'].map((a) => ({
+        label: a.charAt(0).toUpperCase() + a.slice(1),
+        style: s.appearance === a
+          ? "appearance:none; cursor:pointer; flex:1; border-radius:9px; padding:9px 0; background:var(--t-btn,#26241F); color:var(--t-btnText,#EFE9DB); border:none; font-family:'Hanken Grotesk'; font-size:12px; font-weight:700;"
+          : "appearance:none; cursor:pointer; flex:1; border-radius:9px; padding:9px 0; background:transparent; color:var(--t-ink2,#46423a); border:1px solid rgba(var(--t-brgb,42,40,35),0.18); font-family:'Hanken Grotesk'; font-size:12px; font-weight:600;",
+        onPick: () => this.setAppearance(a),
+      })),
+      profileName: profileLabel, profileHandle: s.profile.handle, initials, profileLabel,
+      avatarXs: this.avatarStyle(s.profile.avatar, 32, 12),
+      avatarXsInitials: s.profile.avatar ? '' : initials,
+      avatarSm: this.avatarStyle(s.profile.avatar, 54, 18),
+      avatarLg: this.avatarStyle(s.profileDraft.avatar, 84, 28),
+      avatarSmInitials: s.profile.avatar ? '' : initials,
+      avatarLgInitials: s.profileDraft.avatar ? '' : initials,
+      onAvatarFile: this.onAvatarFile, avatarInputRef: this.avatarInputRef,
+      d_pName: s.profileDraft.name, d_pHandle: s.profileDraft.handle,
+      onProfileName:this.onProfileName, onProfileHandle:this.onProfileHandle,
+      openEditProfile:this.openEditProfile, backToProfile:this.backToProfile, saveProfile:this.saveProfile, onChangePhoto:this.onChangePhoto,
+      closeSheets:this.closeSheets, stopSwipe:this.stopSwipe,
+      onRollStatus: this.onRollStatus,
+      hasDev: devRolls.length > 0, devRolls,
+      scansOpen: s.sheet === 'scans',
+      scanRollName: scanRoll ? scanRoll.name : '', scanRollTotal: scanRoll ? String(scanRoll.total) : '',
+      scanSlots, hasScans: nScans > 0,
+      matchLabel: 'Match ' + nScans + ' scan' + (nScans === 1 ? '' : 's') + ' to frames 01–' + String(nScans).padStart(2, '0'),
+      scanInputRef: this.scanInputRef, addScansClick: this.addScansClick, onScanFiles: this.onScanFiles, matchScans: this.matchScans,
+      scanPD: this.scanPD, scanPM: this.scanPM, scanPU: this.scanPU, scanTrashStyle,
+      sheetStyle, toastStyle, toast:s.toast, hasToast: !!s.toast,
+      d_name:d.name, d_film:d.film, d_camera:d.camera, d_customCount:d.customCount,
+      onName:this.onName, onFilm:this.onFilm, onCamera:this.onCamera, onCustomCount:this.onCustomCount,
+      isCustomCount: d.count === 'custom',
+      filmChips, cameraChips, countOpts, formatOpts,
+      chipPD: this.chipPD, chipPM: this.chipPM, chipPU: this.chipPU, chipWheel: this.chipWheel,
+      startOpts, isCustomStart: d.startMode === 'custom', d_startFrame:d.startFrame, onStartFrame:this.onStartFrame,
+      loadRoll:this.loadRoll, settingsRows,
+    };
+  }
+}
+</script>
+</body>
+</html>
